@@ -1,0 +1,58 @@
+/* Board.css (Güncellendi) */
+.board-list {
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.board-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.board-list li {
+    padding: 8px 15px;
+    margin: 2px 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.board-list li:hover {
+    background-color: #f5f7fa;
+}
+
+.board-list li input[type="checkbox"] {
+    margin-right: 0.5rem;
+    width: 16px;
+    height: 16px;
+    accent-color: #4299e1;
+}
+
+.add-board {
+    background: none;
+    border: none;
+    color: #4299e1;
+    cursor: pointer;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    margin-top: 5px;
+    transition: background-color 0.2s;
+}
+
+.add-board:hover {
+    background-color: #ebf8ff;
+    text-decoration: none;
+}
+
+.divider {
+    border-top: 1px solid #e2e8f0;
+    margin: 1rem 0;
+}

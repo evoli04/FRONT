@@ -1,0 +1,6 @@
+/* WorkspacePage.css */
+.workspace-page {
+    display: flex;
+    height: 100vh;
+    background-color: #f4f5f7;
+}
