@@ -1,0 +1,96 @@
+/* src/components/css/Admin.css */
+
+/* Genel Yönetim Paneli Düzeni */
+.admin-container {
+    display: flex;
+    height: 100vh;
+    /* Arka planı, giriş sayfasındaki gibi gradyan ve animasyonlu yapıyoruz */
+    background: linear-gradient(120deg, #002d4d, #124478, #5962af, #93a9c8, #808cb1);
+    background-size: 400% 400%;
+    animation: gradientMove 18s ease-in-out infinite;
+}
+
+/* Sidebar Stili (Giriş sayfası gibi) */
+.admin-sidebar {
+    width: 280px;
+    background-color: rgba(173, 172, 171, 0.5); /* Daha açık bir gri */
+    color: #ffffff;
+    padding: 30px 20px;
+    box-shadow: 0 8px 32px 0 rgba(195, 196, 206, 0.18);
+    border-radius: 0 16px 16px 0; /* Sol taraf düz, sağ taraf yuvarlak */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.sidebar-header h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.sidebar-nav {
+    flex-grow: 1; /* Navigasyon menüsünün alanı kaplamasını sağlar */
+}
+
+.nav-link {
+    display: block;
+    padding: 15px 20px;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s, color 0.3s;
+    font-weight: 500; /* Linklere biraz kalınlık katıyoruz */
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2); /* Hover ve aktif durum için daha belirgin bir arka plan */
+    color: #ffffff;
+}
+
+/* Ana İçerik Alanı */
+.admin-main {
+    flex-grow: 1;
+    overflow-y: auto; /* İçerik taşarsa kaydırma çubuğu ekler */
+    background-color: transparent; /* Arka planı şeffaf yaparak lacivert kutuyu kaldırıyoruz */
+    box-shadow: none; /* Gölgelendirmeyi kaldırıyoruz */
+    border-radius: 0; /* Kenar yuvarlaklığını kaldırıyoruz */
+}
+
+.admin-main-header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 20px; /* Butonun içeriğe göre konumunu ayarlamak için padding ekliyoruz */
+}
+
+.settings-button {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.settings-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Giriş sayfası için eklediğiniz gradyan animasyonunu buraya da ekliyoruz */
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}

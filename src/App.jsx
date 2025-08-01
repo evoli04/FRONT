@@ -2,16 +2,15 @@
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { createContext, useEffect, useMemo, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { useAuth } from "./hooks/useAuth"; // ayrı dosyadaysa bu şekilde
-
+import { useAuth } from "./hooks/useAuth";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import './App.css';
 
 // Sayfalar
-//import Admin from './pages/Admin';
+import Admin from './pages/Admin';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/LoginForm';
@@ -20,6 +19,9 @@ import NotAuthorized from './pages/NotAuthorized.jsx';
 import Register from './pages/Register';
 import SettingsDrawerWrapper from './pages/SettingsDrawerWrapper';
 import WorkSpace from './pages/Workspace.jsx';
+
+// Bileşenler
+import ProtectedRoute from './components/ProtectedRoute';
 
 export const ThemeContext = createContext();
 
@@ -33,59 +35,66 @@ const lightTheme = {
   color: "#23272f",
 };
 
-// ProtectedRoute mantığını App içinde doğrudan kullanalım
 function AppContent() {
   const { user, loading } = useAuth();
-  const location = useLocation();
+  
+  // URL kontrolü yaparak admin sayfası için farklı tema davranışı sergile
+  const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
+  const isAdminPage = window.location.pathname.startsWith('/admin');
 
   if (loading) {
     return <div style={{ padding: 20, textAlign: 'center' }}>Yükleniyor...</div>;
   }
 
-  const isAdmin = user?.role === "ADMIN";
+  // Admin veya login sayfaları için genel tema stilini uygulamıyoruz.
+  // Bu sayfalardaki bileşenlerin kendi stilleri baskın gelecek.
+  const appContainerStyle = isAdminPage || isLoginPage ? {} : { minHeight: "100vh" };
+  const appContainerClass = isAdminPage || isLoginPage ? '' : (isLoginPage ? "theme-light" : "theme-dark");
 
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<Login />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/not-authorized" element={<NotAuthorized />} />
-      <Route path="/404" element={<NotFound />} />
+    <div
+      className={appContainerClass}
+      style={{ ...appContainerStyle }}
+    >
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/not-authorized" element={<NotAuthorized />} />
+        <Route path="/404" element={<NotFound />} />
 
-      {/* Protected routes */}
-      <Route
-        path="/dashboard"
-        element={
-          user ? <Dashboard /> : <Navigate to="/login" state={{ from: location }} replace />
-        }
-      />
-      <Route
-        path="/workspace"
-        element={
-          user ? <WorkSpace /> : <Navigate to="/login" state={{ from: location }} replace />
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          user ? <SettingsDrawerWrapper /> : <Navigate to="/login" state={{ from: location }} replace />
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          user
-            ? isAdmin
-              ? <Admin />
-              : <Navigate to="/not-authorized" replace />
-            : <Navigate to="/login" replace />
-        }
-      />
-      {/* Catch-all route */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        {/* Protected Routes */}
+        <Route
+          path="/workspace"
+          element={
+            <ProtectedRoute>
+              <WorkSpace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsDrawerWrapper />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/*" // Admin sayfası ve alt rotaları için
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <Admin />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Catch-all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
   );
 }
 
@@ -93,9 +102,20 @@ function App() {
   const [theme, setTheme] = useState("dark");
   const themeStyles = useMemo(() => (theme === "dark" ? darkTheme : lightTheme), [theme]);
 
+  // useEffect'i değiştiriyoruz.
+  // Sadece admin ve login sayfaları dışındaki durumlar için body stilini güncelliyoruz.
   useEffect(() => {
-    document.body.style.background = themeStyles.background;
-    document.body.style.color = themeStyles.color;
+    const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
+    const isAdminPage = window.location.pathname.startsWith('/admin');
+
+    if (!isLoginPage && !isAdminPage) {
+      document.body.style.background = themeStyles.background;
+      document.body.style.color = themeStyles.color;
+    } else {
+       // Bu sayfalar için body stili sıfırlanıyor
+       document.body.style.background = '';
+       document.body.style.color = '';
+    }
   }, [themeStyles]);
 
   return (
@@ -103,12 +123,7 @@ function App() {
       <Router>
         <AuthProvider>
           <ThemeContext.Provider value={{ theme, setTheme }}>
-            <div
-              className={theme === "dark" ? "theme-dark" : "theme-light"}
-              style={{ minHeight: "100vh", ...themeStyles }}
-            >
-              <AppContent />
-            </div>
+            <AppContent />
           </ThemeContext.Provider>
         </AuthProvider>
       </Router>
@@ -117,4 +132,3 @@ function App() {
 }
 
 export default App;
-

@@ -1,38 +1,32 @@
 // src/pages/SettingsDrawerWrapper.jsx
 
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import Settings from './Settings';
+import React from 'react';
+import { Drawer, Box, Typography, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
-const SettingsDrawerWrapper = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(true);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  // URL değiştiğinde drawer'ı açmak için bu useEffect'e ihtiyacınız olmayabilir.
-  // Çoğu durumda, doğrudan /settings sayfasına yönlendirme yeterli olur.
-  useEffect(() => {
-    if (location.pathname === '/settings') {
-      setIsDrawerOpen(true);
-    } else {
-      setIsDrawerOpen(false);
-    }
-  }, [location.pathname]);
-
-  const handleClose = () => {
-    setIsDrawerOpen(false);
-    // Drawer kapandığında bir önceki sayfaya yönlendir
-    if (location.state?.from) {
-      navigate(location.state.from, { replace: true });
-    } else {
-      navigate('/workspace', { replace: true });
-    }
-  };
-
-  return (
-    // Settings bileşenini open ve onClose prop'ları ile çağırıyoruz.
-    <Settings open={isDrawerOpen} onClose={handleClose} />
-  );
+const SettingsDrawerWrapper = ({ open, onClose }) => {
+    return (
+        <Drawer anchor="right" open={open} onClose={onClose}>
+            <Box
+                sx={{
+                    width: 300,
+                    padding: 2,
+                    backgroundColor: '#f0f2f5',
+                    height: '100%',
+                }}
+                role="presentation"
+            >
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                    <Typography variant="h6">Ayarlar</Typography>
+                    <IconButton onClick={onClose}>
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+                {/* Ayarlar içeriği buraya gelecek */}
+                <Typography>Ayarlarınızı buradan yönetebilirsiniz.</Typography>
+            </Box>
+        </Drawer>
+    );
 };
 
 export default SettingsDrawerWrapper;
