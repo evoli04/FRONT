@@ -18,22 +18,22 @@ export const resetPassword = (data) =>
     .then(res => res.data);
     */
 
-    export const forgotPassword = (email) => 
+export const forgotPassword = (email) =>
   apiClient.post('/api/auth/forgot-password', { email })
     .then(res => res.data)
     .catch(error => {
       console.error('Forgot password error:', error.response?.data);
-      throw new Error(error.response?.data?.message || 
-                    'Şifre sıfırlama isteği gönderilemedi');
+      throw new Error(error.response?.data?.message ||
+        'Şifre sıfırlama isteği gönderilemedi');
     });
 
-export const resetPassword = (data) => 
+export const resetPassword = (data) =>
   apiClient.post('/api/auth/reset-password', data)
     .then(res => res.data)
     .catch(error => {
       console.error('Reset password error:', error.response?.data);
-      throw new Error(error.response?.data?.message || 
-                    'Şifre güncelleme başarısız oldu');
+      throw new Error(error.response?.data?.message ||
+        'Şifre güncelleme başarısız oldu');
     });
 
 
