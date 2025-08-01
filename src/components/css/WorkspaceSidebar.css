@@ -1,20 +1,21 @@
 /* WorkspaceSidebar.css */
 .sidebar {
-    width: 280px;
+    width: 320px;
     background-color: white;
     color: #2c3e50;
-    padding: 20px;
+    flex-shrink: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     height: 100vh;
+    overflow-y: scroll;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
     border-bottom: 1px solid #eee;
 }
 
@@ -26,7 +27,7 @@
 
 .header-actions {
     display: flex;
-    gap: 15px;
+    gap: 5px;
 }
 
 .header-button {

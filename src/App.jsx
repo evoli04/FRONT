@@ -1,8 +1,13 @@
 // src/App.jsx
-
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { createContext, useEffect, useMemo, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { createContext, useEffect, useMemo, useState, useContext } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -19,6 +24,7 @@ import NotAuthorized from './pages/NotAuthorized.jsx';
 import Register from './pages/Register';
 import SettingsDrawerWrapper from './pages/SettingsDrawerWrapper';
 import WorkSpace from './pages/Workspace.jsx';
+import BoardPage from './pages/BoardPage.jsx';
 
 // Bileşenler
 import ProtectedRoute from './components/ProtectedRoute';
@@ -37,19 +43,20 @@ const lightTheme = {
 
 function AppContent() {
   const { user, loading } = useAuth();
-  
-  // URL kontrolü yaparak admin sayfası için farklı tema davranışı sergile
-  const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
-  const isAdminPage = window.location.pathname.startsWith('/admin');
+  const location = useLocation();
+  const { theme } = useContext(ThemeContext);
+
+  // URL kontrolü yaparak admin ve login sayfaları için farklı tema davranışı sergile
+  const isLoginPage = location.pathname === '/login' || location.pathname === '/';
+  const isAdminPage = location.pathname.startsWith('/admin');
 
   if (loading) {
     return <div style={{ padding: 20, textAlign: 'center' }}>Yükleniyor...</div>;
   }
 
   // Admin veya login sayfaları için genel tema stilini uygulamıyoruz.
-  // Bu sayfalardaki bileşenlerin kendi stilleri baskın gelecek.
   const appContainerStyle = isAdminPage || isLoginPage ? {} : { minHeight: "100vh" };
-  const appContainerClass = isAdminPage || isLoginPage ? '' : (isLoginPage ? "theme-light" : "theme-dark");
+  const appContainerClass = isAdminPage || isLoginPage ? '' : (theme === "dark" ? "theme-dark" : "theme-light");
 
   return (
     <div
@@ -57,7 +64,7 @@ function AppContent() {
       style={{ ...appContainerStyle }}
     >
       <Routes>
-        {/* Public Routes */}
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -65,12 +72,28 @@ function AppContent() {
         <Route path="/not-authorized" element={<NotAuthorized />} />
         <Route path="/404" element={<NotFound />} />
 
-        {/* Protected Routes */}
+        {/* Protected routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/workspace"
           element={
             <ProtectedRoute>
               <WorkSpace />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/board/:workspaceId/:boardName"
+          element={
+            <ProtectedRoute>
+              <BoardPage />
             </ProtectedRoute>
           }
         />
@@ -83,7 +106,7 @@ function AppContent() {
           }
         />
         <Route
-          path="/admin/*" // Admin sayfası ve alt rotaları için
+          path="/admin/*"
           element={
             <ProtectedRoute requireAdmin={true}>
               <Admin />
@@ -102,8 +125,6 @@ function App() {
   const [theme, setTheme] = useState("dark");
   const themeStyles = useMemo(() => (theme === "dark" ? darkTheme : lightTheme), [theme]);
 
-  // useEffect'i değiştiriyoruz.
-  // Sadece admin ve login sayfaları dışındaki durumlar için body stilini güncelliyoruz.
   useEffect(() => {
     const isLoginPage = window.location.pathname === '/login' || window.location.pathname === '/';
     const isAdminPage = window.location.pathname.startsWith('/admin');
@@ -112,9 +133,9 @@ function App() {
       document.body.style.background = themeStyles.background;
       document.body.style.color = themeStyles.color;
     } else {
-       // Bu sayfalar için body stili sıfırlanıyor
-       document.body.style.background = '';
-       document.body.style.color = '';
+      // Bu sayfalar için body stili sıfırlanıyor
+      document.body.style.background = '';
+      document.body.style.color = '';
     }
   }, [themeStyles]);
 

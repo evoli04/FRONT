@@ -1,7 +1,11 @@
-/* Board.css (Güncellendi) */
+/* Board.css */
 .board-list {
-    padding-left: 1rem;
-    margin-top: 0.5rem;
+    width: 300px;
+    background-color: #f8f9fa;
+    padding: 10px;
+    height: 100%;
+    border-right: 1px solid #e1e4e8;
+    position: relative;
 }
 
 .board-list ul {
@@ -10,49 +14,112 @@
     margin: 0;
 }
 
-.board-list li {
-    padding: 8px 15px;
-    margin: 2px 0;
-    color: #333;
+.board-item {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.board-item:hover {
+    background-color: #ebecf0;
+}
+
+.board-item>div:first-child {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    border-radius: 6px;
-    transition: background-color 0.2s;
 }
 
-.board-list li:hover {
-    background-color: #f5f7fa;
+.board-item input {
+    margin-right: 8px;
+    cursor: pointer;
 }
 
-.board-list li input[type="checkbox"] {
-    margin-right: 0.5rem;
-    width: 16px;
-    height: 16px;
-    accent-color: #4299e1;
+.board-expanded {
+    margin-top: 8px;
+    padding: 8px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: calc(100% - 16px);
+    z-index: 10;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.list-item {
+    background-color: #ebecf0;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.add-list-form {
+    display: flex;
+    margin-top: 8px;
+}
+
+.list-input {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid #dfe1e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.add-list-button {
+    margin-left: 8px;
+    padding: 6px 10px;
+    background-color: #5aac44;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.add-list-button:hover {
+    background-color: #61bd4f;
 }
 
 .add-board {
-    background: none;
+    width: 100%;
+    padding: 8px 10px;
+    background-color: transparent;
     border: none;
-    color: #4299e1;
+    color: #5e6c84;
+    text-align: left;
     cursor: pointer;
-    padding: 8px 15px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    border-radius: 6px;
-    margin-top: 5px;
-    transition: background-color 0.2s;
+    margin-top: 8px;
 }
 
 .add-board:hover {
-    background-color: #ebf8ff;
-    text-decoration: none;
+    background-color: #ebecf0;
 }
 
 .divider {
-    border-top: 1px solid #e2e8f0;
-    margin: 1rem 0;
+    height: 1px;
+    background-color: #e1e4e8;
+    margin: 8px 0;
 }
