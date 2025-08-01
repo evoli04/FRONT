@@ -1,4 +1,5 @@
-// WorkspaceSidebar.jsx
+// src/pages/WorkspaceSidebar.jsx (veya src/components/WorkspaceSidebar.jsx)
+
 import React from 'react';
 import { FiSettings, FiLogOut, FiPlus } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -19,12 +20,19 @@ export default function WorkspaceSidebar({
         navigate('/login'); // Login sayfasına yönlendir
     };
 
+    const handleOpenSettings = () => { // <-- Bu fonksiyonu eklediğinden emin ol
+        navigate('/settings');
+    };
+
     return (
         <div className="sidebar">
             <div className="header">
                 <div className="logo">NODORA</div>
                 <div className="header-actions">
-                    <button className="header-button">
+                    <button 
+                        className="header-button"
+                        onClick={handleOpenSettings} // <-- Burası çok önemli
+                    >
                         <FiSettings size={18} />
                     </button>
                     <button
@@ -36,29 +44,7 @@ export default function WorkspaceSidebar({
                 </div>
             </div>
 
-            <div className="section-title">Çalışma Alanlarım</div>
-
-            <button className="add-button" onClick={onAddWorkspaceClick}>
-                <FiPlus size={16} /> Çalışma Alanı Ekle
-            </button>
-
-            {workspaces.map(workspace => (
-                <div key={workspace.id} className="workspace-section">
-                    <div
-                        className={`workspace-title ${selectedWorkspace?.id === workspace.id ? 'active' : ''}`}
-                        onClick={() => onSelectWorkspace(workspace)}
-                    >
-                        {workspace.name}
-                    </div>
-
-                    {selectedWorkspace?.id === workspace.id && (
-                        <BoardList
-                            boards={workspace.boards}
-                            onAddBoardClick={onAddBoardClick}
-                        />
-                    )}
-                </div>
-            ))}
+            {/* ... geri kalan kısım */}
         </div>
     );
 }

@@ -1,0 +1,22 @@
+{
+  "settings": "Ayarlar",
+  "theme": "Tema",
+  "light": "Açık",
+  "dark": "Koyu",
+  "language": "Dil",
+  "changePassword": "Şifre Değiştir",
+  "currentPassword": "Mevcut Şifre",
+  "newPassword": "Yeni Şifre",
+  "confirmPassword": "Şifreyi Onayla",
+  "change": "Değiştir",
+  "userProfile": "Kullanıcı Profili",
+  "name": "İsim",
+  "email": "E-posta",
+  "updateProfile": "Profili Güncelle",
+  "logout": "Çıkış Yap",
+  "logoutConfirm": "Çıkış yapmak istediğinize emin misiniz?",
+  "cancel": "İptal",
+  "logoutSuccess": "Başarıyla çıkış yapıldı!",
+  "passwordNotMatch": "Şifreler eşleşmiyor.",
+  "passwordChanged": "Şifreniz başarıyla değiştirildi!"
+}
