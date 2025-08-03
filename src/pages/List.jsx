@@ -1,6 +1,5 @@
-// List.jsx
 import React, { useState } from 'react';
-import { FiPlus, FiX } from 'react-icons/fi';
+import { FiPlus, FiTrash2 } from 'react-icons/fi';
 import Card from './Card';
 import '../components/css/List.css';
 
@@ -30,8 +29,9 @@ export default function List({ list, onUpdate, onDelete }) {
                 <button
                     className="delete-list-button"
                     onClick={onDelete}
+                    aria-label="Listeyi sil"
                 >
-                    <FiX size={16} />
+                    <FiTrash2 size={16} />
                 </button>
             </div>
 
@@ -89,7 +89,7 @@ export default function List({ list, onUpdate, onDelete }) {
                     className="add-card-button"
                     onClick={() => setShowCardForm(true)}
                 >
-                    <FiPlus /> Kart Ekle
+                    <FiPlus size={14} /> Kart Ekle
                 </button>
             )}
         </div>

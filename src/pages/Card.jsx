@@ -1,6 +1,6 @@
 // Card.jsx
 import React, { useState } from 'react';
-import { FiPlus, FiX, FiCheck } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiCheck } from 'react-icons/fi';
 import '../components/css/Card.css';
 
 export default function Card({ card, onUpdate, onDelete }) {
@@ -39,8 +39,9 @@ export default function Card({ card, onUpdate, onDelete }) {
                 <button
                     className="delete-card-button"
                     onClick={onDelete}
+                    aria-label="Kartı sil"
                 >
-                    <FiX size={14} />
+                    <FiTrash2 size={14} />
                 </button>
             </div>
 
