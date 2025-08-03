@@ -1,7 +1,6 @@
 import React from 'react';
-import { FiSettings, FiLogOut, FiPlus } from 'react-icons/fi';
+import { FiSettings, FiLogOut, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import BoardList from './Board';
 import '../components/css/WorkspaceSidebar.css';
 
 export default function WorkspaceSidebar({
@@ -10,12 +9,21 @@ export default function WorkspaceSidebar({
     onSelectWorkspace,
     onShowAllWorkspaces,
     onAddWorkspaceClick,
-    onAddBoardClick
+    onAddBoardClick,
+    onDeleteWorkspace
 }) {
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        navigate('/login');
+    const handleLogout = () => navigate('/login');
+    const handleSettings = () => navigate('/Settings2'); // settings2 yerine settings yaptım
+
+    const handleWorkspaceClick = (workspace) => {
+        onSelectWorkspace(selectedWorkspace?.id === workspace.id ? null : workspace);
+    };
+
+    const handleDelete = (e, id) => {
+        e.stopPropagation();
+        onDeleteWorkspace(id);
     };
 
     return (
@@ -23,7 +31,7 @@ export default function WorkspaceSidebar({
             <div className="header">
                 <div className="logo">NODORA</div>
                 <div className="header-actions">
-                    <button className="header-button">
+                    <button className="header-button" onClick={handleSettings}>
                         <FiSettings size={18} />
                     </button>
                     <button className="header-button" onClick={handleLogout}>
@@ -32,11 +40,7 @@ export default function WorkspaceSidebar({
                 </div>
             </div>
 
-            <div
-                className="section-title"
-                onClick={onShowAllWorkspaces}
-                style={{ cursor: 'pointer' }}
-            >
+            <div className="section-title" onClick={onShowAllWorkspaces}>
                 Çalışma Alanlarım
             </div>
 
@@ -44,24 +48,44 @@ export default function WorkspaceSidebar({
                 <FiPlus size={16} /> Çalışma Alanı Ekle
             </button>
 
-            {workspaces.map(workspace => (
-                <div key={workspace.id} className="workspace-section">
-                    <div
-                        className={`workspace-title ${selectedWorkspace?.id === workspace.id ? 'active' : ''}`}
-                        onClick={() => onSelectWorkspace(workspace)}
-                        style={{ cursor: 'pointer' }}
-                    >
-                        {workspace.name}
-                    </div>
+            <div className="workspaces-list">
+                {workspaces.map(workspace => (
+                    <div key={workspace.id} className="workspace-item">
+                        <div
+                            className={`workspace-header ${selectedWorkspace?.id === workspace.id ? 'active' : ''}`}
+                            onClick={() => handleWorkspaceClick(workspace)}
+                        >
+                            <span className="workspace-title">{workspace.name}</span>
+                            <button
+                                className="delete-btn"
+                                onClick={(e) => handleDelete(e, workspace.id)}
+                            >
+                                <FiTrash2 size={14} />
+                            </button>
+                        </div>
 
-                    {selectedWorkspace?.id === workspace.id && (
-                        <BoardList
-                            boards={workspace.boards}
-                            onAddBoardClick={onAddBoardClick}
-                        />
-                    )}
-                </div>
-            ))}
+                        {selectedWorkspace?.id === workspace.id && (
+                            <div className="boards-container">
+                                {workspace.boards.map((board, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="board-item"
+                                        onClick={() => console.log('Board clicked:', board)}
+                                    >
+                                        {board}
+                                    </div>
+                                ))}
+                                <button
+                                    className="add-board-btn"
+                                    onClick={onAddBoardClick}
+                                >
+                                    <FiPlus size={14} /> Pano Ekle
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

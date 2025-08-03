@@ -25,6 +25,7 @@ import Register from './pages/Register';
 import SettingsDrawerWrapper from './pages/SettingsDrawerWrapper';
 import WorkSpace from './pages/Workspace.jsx';
 import BoardPage from './pages/BoardPage.jsx';
+import Settings2 from './pages/Settings2'; // Yeni eklenen satır
 
 // Bileşenler
 import ProtectedRoute from './components/ProtectedRoute';
@@ -102,6 +103,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <SettingsDrawerWrapper />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings2" // Yeni eklenen route
+          element={
+            <ProtectedRoute>
+              <Settings2 />
             </ProtectedRoute>
           }
         />

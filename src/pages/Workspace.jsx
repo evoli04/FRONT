@@ -14,7 +14,7 @@ export default function Workspace() {
   const [selectedWorkspace, setSelectedWorkspace] = useState(null);
   const [showWorkspacePopup, setShowWorkspacePopup] = useState(false);
   const [showBoardPopup, setShowBoardPopup] = useState(false);
-  const [showAllWorkspaces, setShowAllWorkspaces] = useState(true); // Yeni state
+  const [showAllWorkspaces, setShowAllWorkspaces] = useState(true);
   const navigate = useNavigate();
 
   const handleAddWorkspace = (name) => {
@@ -29,9 +29,15 @@ export default function Workspace() {
 
   const handleAddBoard = (boardName) => {
     if (!selectedWorkspace) return;
-    setWorkspaces(prev => prev.map(ws =>
-      ws.id === selectedWorkspace.id ? { ...ws, boards: [...ws.boards, boardName] } : ws
-    ));
+
+    const updatedWorkspaces = workspaces.map(ws =>
+      ws.id === selectedWorkspace.id
+        ? { ...ws, boards: [...ws.boards, boardName] }
+        : ws
+    );
+
+    setWorkspaces(updatedWorkspaces);
+    setSelectedWorkspace(updatedWorkspaces.find(ws => ws.id === selectedWorkspace.id));
     setShowBoardPopup(false);
   };
 
@@ -42,7 +48,19 @@ export default function Workspace() {
 
   const handleWorkspaceSelect = (workspace) => {
     setSelectedWorkspace(workspace);
-    setShowAllWorkspaces(false); // Çalışma alanı seçildiğinde listeyi gizle
+    setShowAllWorkspaces(false);
+  };
+
+  const handleDeleteWorkspace = (workspaceId) => {
+    if (window.confirm('Bu çalışma alanını ve tüm panolarını silmek istediğinize emin misiniz?')) {
+      const updatedWorkspaces = workspaces.filter(ws => ws.id !== workspaceId);
+      setWorkspaces(updatedWorkspaces);
+
+      if (selectedWorkspace?.id === workspaceId) {
+        setSelectedWorkspace(null);
+        setShowAllWorkspaces(true);
+      }
+    }
   };
 
   return (
@@ -53,10 +71,11 @@ export default function Workspace() {
         onSelectWorkspace={handleWorkspaceSelect}
         onShowAllWorkspaces={() => {
           setSelectedWorkspace(null);
-          setShowAllWorkspaces(true); // Tüm çalışma alanlarını göster
+          setShowAllWorkspaces(true);
         }}
         onAddWorkspaceClick={() => setShowWorkspacePopup(true)}
         onAddBoardClick={() => selectedWorkspace && setShowBoardPopup(true)}
+        onDeleteWorkspace={handleDeleteWorkspace}
       />
 
       <main className="workspace-main-content">

@@ -1,147 +1,168 @@
 /* WorkspaceSidebar.css */
 .sidebar {
-    width: 320px;
-    background-color: white;
-    color: #2c3e50;
-    flex-shrink: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    width: 280px;
+    background: linear-gradient(135deg, #6e45e2 0%, #89d4cf 100%);
     height: 100vh;
-    overflow-y: scroll;
+    padding: 15px;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 5px;
-    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #2c3e50;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
 }
 
 .header-actions {
     display: flex;
-    gap: 5px;
+    gap: 10px;
 }
 
 .header-button {
     background: none;
     border: none;
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
-    color: #7f8c8d;
-    font-size: 1rem;
-    transition: color 0.2s;
+    transition: all 0.2s;
 }
 
 .header-button:hover {
-    color: #2c3e50;
+    color: white;
+    transform: scale(1.1);
 }
 
 .section-title {
-    font-size: 1rem;
-    color: #2c3e50;
-    margin: 20px 0 15px 0;
     font-weight: 600;
+    margin: 10px 0;
+    padding: 8px 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.section-title:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .add-button {
-    background: none;
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
     border: none;
-    color: #7f8c8d;
+    border-radius: 4px;
     cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
-    font-size: 0.9rem;
-    margin-bottom: 20px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    width: 100%;
+    transition: all 0.2s;
 }
 
 .add-button:hover {
-    background-color: #f5f7fa;
-    color: #2c3e50;
+    background: rgba(255, 255, 255, 0.3);
 }
 
-.workspace-section {
-    margin-bottom: 15px;
+.workspaces-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.workspace-title {
-    font-size: 0.95rem;
-    color: #2c3e50;
-    padding: 8px 12px;
-    border-radius: 4px;
+.workspace-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.workspace-header {
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background 0.2s;
 }
 
-.workspace-title.active {
-    background-color: #e3f2fd;
-    color: #1976d2;
+.workspace-header:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.workspace-header.active {
+    background: rgba(255, 255, 255, 0.25);
     font-weight: 500;
 }
 
-.workspace-title:hover {
-    background-color: #f5f7fa;
+.workspace-title {
+    flex-grow: 1;
 }
 
-/* BoardList.css */
-.board-list {
-    padding-left: 1rem;
-    margin-top: 0.5rem;
-}
-
-.board-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.board-list li {
-    padding: 8px 15px;
-    margin: 2px 0;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    border-radius: 4px;
-}
-
-.board-list li:hover {
-    background-color: #f5f7fa;
-}
-
-.board-list li input[type="checkbox"] {
-    margin-right: 0.5rem;
-}
-
-.add-board {
+.delete-btn {
     background: none;
     border: none;
-    color: #0079bf;
+    color: rgba(255, 255, 255, 0.6);
     cursor: pointer;
-    padding: 8px 15px;
+    opacity: 0;
+    transition: all 0.2s;
+    padding: 2px;
+}
+
+.workspace-header:hover .delete-btn {
+    opacity: 1;
+}
+
+.delete-btn:hover {
+    color: white;
+}
+
+.boards-container {
+    padding: 5px 15px 10px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.board-item {
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.board-item:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.add-board-btn {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    border-radius: 4px;
-    margin-top: 5px;
+    justify-content: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
 }
 
-.add-board:hover {
-    background-color: #f0f7ff;
-}
-
-.divider {
-    border-top: 1px solid #eee;
-    margin: 1rem 0;
+.add-board-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }

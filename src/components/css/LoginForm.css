@@ -5,7 +5,7 @@
     top: 0;
     left: 0;
     z-index: 0;
-    background: linear-gradient(120deg, #002d4d, #124478, #5962af, #93a9c8, #808cb1);
+    background: linear-gradient(120deg, #002d4d, #124478, #5962af, #aab0b7, #808cb1);
     background-size: 400% 400%;
     animation: gradientMove 18s ease-in-out infinite;
     display: flex;
@@ -206,4 +206,37 @@
     display: flex;
     align-items: center;
     margin-right: 4px;
+}
+
+/* LoginForm.css'ye ekleyeceğiniz yeni stil */
+.password-toggle-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.password-toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.password-toggle-icon {
+    font-size: 20px;
+    display: inline-block;
+    transition: all 0.2s;
+}
+
+.password-toggle-btn:hover .password-toggle-icon {
+    transform: scale(1.1);
 }
