@@ -1,57 +1,50 @@
-// src/pages/Admin.jsx
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate, Link, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import '../components/css/Admin.css';
+import { ThemeContext } from '../App';
+import { useTranslation } from 'react-i18next';
 
-// Settings bileşenini ve ilgili ikonları import edin
-import Settings from './Settings'; // Settings bileşenini doğrudan import ediyoruz
+import Settings from './Settings';
 import { IconButton } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 const Admin = () => {
     const { user, token, loading } = useAuth();
     const navigate = useNavigate();
-    const [activeMenu, setActiveMenu] = useState('dashboard');
-    // Ayarlar panelinin açık/kapalı durumunu yönetmek için yeni state
+    const [activeMenu, setActiveMenu] = useState('dashboard'); // Başlangıç menüsü tekrar 'dashboard' olarak ayarlandı
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    
+    const { theme } = useContext(ThemeContext); 
+    const { t } = useTranslation();
 
     useEffect(() => {
-        // Check after loading is complete and user data is available
         if (!loading) {
             if (!token) {
-                // Redirect to login page if the user is not logged in
                 navigate('/login');
             } else if (user?.role?.toUpperCase() !== 'ADMIN') {
-                // Redirect to not-authorized page if the user is not an admin
                 navigate('/not-authorized');
             }
         }
     }, [token, user, loading, navigate]);
 
-    // Yükleme veya yetkilendirme kontrolü sırasında yükleme mesajı göster
     if (loading || !user || user.role?.toUpperCase() !== 'ADMIN') {
-        return <div>Yükleniyor...</div>;
+        return <div>{t('loading')}</div>;
     }
 
-    // Ayarlar panelini açan fonksiyon
     const handleOpenSettings = () => {
         setIsSettingsOpen(true);
     };
 
-    // Ayarlar panelini kapatan fonksiyon
     const handleCloseSettings = () => {
         setIsSettingsOpen(false);
     };
 
-    // Yönetim panelini render et
     return (
-        <div className="admin-container">
-            {/* Yan menü (Sidebar) */}
+        <div className={`admin-container ${theme}`}> 
             <aside className="admin-sidebar">
                 <div className="sidebar-header">
-                    <h2>Yönetim Paneli</h2>
+                    <h2>{t('adminPanel')}</h2>
                 </div>
                 <nav className="sidebar-nav">
                     <Link 
@@ -59,46 +52,34 @@ const Admin = () => {
                         onClick={() => setActiveMenu('dashboard')} 
                         className={`nav-link ${activeMenu === 'dashboard' ? 'active' : ''}`}
                     >
-                        Kontrol Paneli
+                        {t('dashboard')}
                     </Link>
                     <Link 
                         to="/admin/workspaces" 
                         onClick={() => setActiveMenu('workspaces')} 
                         className={`nav-link ${activeMenu === 'workspaces' ? 'active' : ''}`}
                     >
-                        Workspaceler
-                    </Link>
-                    <Link 
-                        to="/admin/boards" 
-                        onClick={() => setActiveMenu('boards')} 
-                        className={`nav-link ${activeMenu === 'boards' ? 'active' : ''}`}
-                    >
-                        Panolar
+                        {t('workspaces')}
                     </Link>
                     <Link 
                         to="/admin/logs" 
                         onClick={() => setActiveMenu('logs')} 
                         className={`nav-link ${activeMenu === 'logs' ? 'active' : ''}`}
                     >
-                        Log Kayıtları
+                        {t('logs')}
                     </Link>
                 </nav>
             </aside>
             
-            {/* Ana içerik alanı - alt rotalar burada render edilecek */}
             <main className="admin-main">
-                {/* Admin-main'in içine ayarlar butonunu ve başlığı ekleyelim */}
                 <div className="admin-main-header">
-                    {/* Ayarlar butonu */}
                     <IconButton onClick={handleOpenSettings} className="settings-button">
                         <SettingsIcon />
                     </IconButton>
                 </div>
-                {/* Outlet'i doğrudan main'in içine taşıyoruz */}
                 <Outlet />
             </main>
 
-            {/* Ayarlar paneli, sadece isSettingsOpen true olduğunda görüntülenir. */}
             {isSettingsOpen && <Settings open={isSettingsOpen} onClose={handleCloseSettings} />}
         </div>
     );

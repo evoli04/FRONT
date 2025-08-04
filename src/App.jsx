@@ -1,4 +1,3 @@
-// src/App.jsx
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { createContext, useEffect, useMemo, useState, useContext } from "react";
 import {
@@ -7,15 +6,17 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 import { GoogleOAuthProvider } from '@react-oauth/google';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // React Query için gerekli
 import './App.css';
 
 // Sayfalar
 import Admin from './pages/Admin';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminWorkspaces from './pages/AdminWorkspaces';
+import AdminLogs from './pages/AdminLogs';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import Login from './pages/LoginForm';
@@ -25,12 +26,13 @@ import Register from './pages/Register';
 import SettingsDrawerWrapper from './pages/SettingsDrawerWrapper';
 import WorkSpace from './pages/Workspace.jsx';
 import BoardPage from './pages/BoardPage.jsx';
-import Settings2 from './pages/Settings2'; // Yeni eklenen satır
+import Settings2 from './pages/Settings2';
 
 // Bileşenler
 import ProtectedRoute from './components/ProtectedRoute';
 
 export const ThemeContext = createContext();
+const queryClient = new QueryClient(); // QueryClient oluşturuldu
 
 const darkTheme = {
   background: "#18191A",
@@ -47,7 +49,6 @@ function AppContent() {
   const location = useLocation();
   const { theme } = useContext(ThemeContext);
 
-  // URL kontrolü yaparak admin ve login sayfaları için farklı tema davranışı sergile
   const isLoginPage = location.pathname === '/login' || location.pathname === '/';
   const isAdminPage = location.pathname.startsWith('/admin');
 
@@ -55,7 +56,6 @@ function AppContent() {
     return <div style={{ padding: 20, textAlign: 'center' }}>Yükleniyor...</div>;
   }
 
-  // Admin veya login sayfaları için genel tema stilini uygulamıyoruz.
   const appContainerStyle = isAdminPage || isLoginPage ? {} : { minHeight: "100vh" };
   const appContainerClass = isAdminPage || isLoginPage ? '' : (theme === "dark" ? "theme-dark" : "theme-light");
 
@@ -107,21 +107,27 @@ function AppContent() {
           }
         />
         <Route
-          path="/settings2" // Yeni eklenen route
+          path="/settings2"
           element={
             <ProtectedRoute>
               <Settings2 />
             </ProtectedRoute>
           }
         />
+        {/* Admin paneli rotaları */}
         <Route
-          path="/admin/*"
+          path="/admin"
           element={
             <ProtectedRoute requireAdmin={true}>
               <Admin />
             </ProtectedRoute>
           }
-        />
+        >
+          {/* Admin alt rotaları, Admin bileşenindeki Outlet'te görünecek */}
+          <Route index element={<AdminDashboard />} />
+          <Route path="workspaces" element={<AdminWorkspaces />} />
+          <Route path="logs" element={<AdminLogs />} />
+        </Route>
 
         {/* Catch-all */}
         <Route path="*" element={<NotFound />} />
@@ -142,7 +148,6 @@ function App() {
       document.body.style.background = themeStyles.background;
       document.body.style.color = themeStyles.color;
     } else {
-      // Bu sayfalar için body stili sıfırlanıyor
       document.body.style.background = '';
       document.body.style.color = '';
     }
@@ -153,7 +158,9 @@ function App() {
       <Router>
         <AuthProvider>
           <ThemeContext.Provider value={{ theme, setTheme }}>
-            <AppContent />
+            <QueryClientProvider client={queryClient}> {/* QueryClientProvider eklendi */}
+              <AppContent />
+            </QueryClientProvider>
           </ThemeContext.Provider>
         </AuthProvider>
       </Router>

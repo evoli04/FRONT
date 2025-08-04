@@ -11,6 +11,7 @@ import { ThemeContext } from '../App';
 import { AuthContext } from '../context/AuthContext';
 import { logout } from '../services/auth';
 import "../components/css/Settings.css";
+
 // Desteklenen diller
 const languages = [
   { code: 'tr', label: 'Türkçe' },
@@ -39,25 +40,22 @@ const getInputClass = (baseClass) => {
 }
 
 const Settings = ({ open, onClose }) => {
-  // Tema context
   const { theme, setTheme } = useContext(ThemeContext);
-  // Auth context
   const { logout: authLogout } = useContext(AuthContext);
-  // i18next
   const { t, i18n } = useTranslation();
-  // Navigation
   const navigate = useNavigate();
-  // Şifre
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  // Profil
+
+  // Profil state'ini çeviri anahtarlarıyla başlatıyoruz
   const [profile, setProfile] = useState({
-    name: 'Kullanıcı Adı',
-    email: 'kullanici@email.com',
+    name: t('namePlaceholder'),
+    email: t('emailPlaceholder'),
   });
 
   // Tema değişimi
@@ -108,7 +106,7 @@ const Settings = ({ open, onClose }) => {
                 onClose();
                 navigate('/login');
               } catch (error) {
-                toast.error('Çıkış yapılırken bir hata oluştu');
+                toast.error(t('logoutError'));
               }
             }}
           >
@@ -247,6 +245,7 @@ const Settings = ({ open, onClose }) => {
                 onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                 required
                 className={getInputClass("premium-input")}
+                placeholder={t('namePlaceholder')}
               />
             </div>
             <div className="form-group">
@@ -257,6 +256,7 @@ const Settings = ({ open, onClose }) => {
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                 required
                 className={getInputClass("premium-input")}
+                placeholder={t('emailPlaceholder')}
               />
             </div>
             <button type="submit" className="primary-button">{t('updateProfile')}</button>
