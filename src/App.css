@@ -1,21 +1,8 @@
 /* src/App.css */
 
 /*
-  Bu stil, tüm uygulamanın varsayılan temasını belirler.
-  Arka plan rengi ve metin rengi, theme-dark veya theme-light sınıflarına göre değişir.
-*/
-.theme-dark {
-  background-color: #18191A;
-  color: #E4E6EB;
-}
-
-.theme-light {
-  background-color: #f4f6fa;
-  color: #23272f;
-}
-
-/*
   Bu stil, sayfa içeriğinin tam ekranı kaplamasını sağlar.
+  Temanın ana renkleri artık index.css'ten geliyor.
 */
 .app-container {
   min-height: 100vh;
@@ -26,8 +13,6 @@
 
 /*
   Bu stil, panelin tüm ekranı kaplamasını sağlar.
-  'position: fixed', 'inset: 0' ve 'z-index: 100' özellikleri,
-  panelin diğer içeriklerin üzerine gelerek tam ekran olmasını sağlar.
 */
 .settings-drawer-wrapper {
   position: fixed;
@@ -45,5 +30,5 @@
 
 /* Tüm bileşenlerdeki yazı tiplerini belirle */
 body, h1, h2, h3, h4, h5, h6, p, span, div {
-  font-family: 'Poppins', sans-serif; /* Popüler, modern ve okunaklı bir font */
+  font-family: 'Poppins', sans-serif;
 }

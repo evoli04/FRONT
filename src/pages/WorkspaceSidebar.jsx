@@ -3,6 +3,19 @@ import { FiSettings, FiLogOut, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import '../components/css/WorkspaceSidebar.css';
 
+/**
+ * Bu bileşen, çalışma alanları ve panolar için yan menüyü oluşturur.
+ * 'isDarkTheme' prop'una göre temasını otomatik olarak ayarlar.
+ * @param {Object[]} workspaces - Çalışma alanı listesi.
+ * @param {Object} selectedWorkspace - Seçili olan çalışma alanı.
+ * @param {Function} onSelectWorkspace - Çalışma alanı seçme işlevi.
+ * @param {Function} onShowAllWorkspaces - Tüm çalışma alanlarını gösterme işlevi.
+ * @param {Function} onAddWorkspaceClick - Yeni çalışma alanı ekleme işlevi.
+ * @param {Function} onAddBoardClick - Yeni pano ekleme işlevi.
+ * @param {Function} onDeleteWorkspace - Çalışma alanı silme işlevi.
+ * @param {Function} onOpenSettings - Ayarlar panelini açma işlevi.
+ * @param {boolean} isDarkTheme - Koyu tema aktifse 'true', değilse 'false'.
+ */
 export default function WorkspaceSidebar({
     workspaces,
     selectedWorkspace,
@@ -10,12 +23,13 @@ export default function WorkspaceSidebar({
     onShowAllWorkspaces,
     onAddWorkspaceClick,
     onAddBoardClick,
-    onDeleteWorkspace
+    onDeleteWorkspace,
+    onOpenSettings,
+    isDarkTheme // Tema durumunu belirleyen yeni prop
 }) {
     const navigate = useNavigate();
 
     const handleLogout = () => navigate('/login');
-    const handleSettings = () => navigate('/Settings2'); // settings2 yerine settings yaptım
 
     const handleWorkspaceClick = (workspace) => {
         onSelectWorkspace(selectedWorkspace?.id === workspace.id ? null : workspace);
@@ -26,12 +40,19 @@ export default function WorkspaceSidebar({
         onDeleteWorkspace(id);
     };
 
+    // 'isDarkTheme' prop'una göre CSS sınıfını dinamik olarak belirliyoruz.
+    // Koyu tema için 'sidebar dark' sınıfını, açık tema için sadece 'sidebar' sınıfını atıyoruz.
+    const sidebarClass = isDarkTheme ? 'sidebar dark' : 'sidebar';
+
     return (
-        <div className="sidebar">
+        <div className={sidebarClass}>
             <div className="header">
-                <div className="logo">NODORA</div>
+                <div className="logo-container">
+                    <img src="/images/logo.png" alt="Uygulama Logosu" className="app-logo" />
+                </div>
+
                 <div className="header-actions">
-                    <button className="header-button" onClick={handleSettings}>
+                    <button className="header-button" onClick={onOpenSettings}>
                         <FiSettings size={18} />
                     </button>
                     <button className="header-button" onClick={handleLogout}>

@@ -3,7 +3,15 @@ import { FiPlus, FiTrash2 } from 'react-icons/fi';
 import Card from './Card';
 import '../components/css/List.css';
 
-export default function List({ list, onUpdate, onDelete }) {
+/**
+ * Bu bileşen, bir panodaki listeyi ve içindeki kartları görüntüler.
+ * Tema durumunu (isDarkTheme) prop olarak alır.
+ * @param {Object} list - Liste verileri.
+ * @param {Function} onUpdate - Listeyi güncelleme işlevi.
+ * @param {Function} onDelete - Listeyi silme işlevi.
+ * @param {boolean} isDarkTheme - Koyu tema aktifse 'true', değilse 'false'.
+ */
+export default function List({ list, onUpdate, onDelete, isDarkTheme }) {
     const [newCardTitle, setNewCardTitle] = useState('');
     const [showCardForm, setShowCardForm] = useState(false);
 
@@ -22,8 +30,13 @@ export default function List({ list, onUpdate, onDelete }) {
         setShowCardForm(false);
     };
 
+    // isDarkTheme prop'una göre CSS sınıfını dinamik olarak belirliyoruz
+    const listClass = isDarkTheme ? 'list-container dark' : 'list-container';
+    const cardFormClass = isDarkTheme ? 'add-card-form dark' : 'add-card-form';
+    const addButtonClass = isDarkTheme ? 'add-card-button dark' : 'add-card-button';
+
     return (
-        <div className="list-container">
+        <div className={listClass}>
             <div className="list-header">
                 <h3 className="list-title">{list.title}</h3>
                 <button
@@ -56,12 +69,13 @@ export default function List({ list, onUpdate, onDelete }) {
                             };
                             onUpdate(updatedList);
                         }}
+                        isDarkTheme={isDarkTheme}
                     />
                 ))}
             </div>
 
             {showCardForm ? (
-                <div className="add-card-form">
+                <div className={cardFormClass}>
                     <input
                         type="text"
                         value={newCardTitle}
@@ -86,7 +100,7 @@ export default function List({ list, onUpdate, onDelete }) {
                 </div>
             ) : (
                 <button
-                    className="add-card-button"
+                    className={addButtonClass}
                     onClick={() => setShowCardForm(true)}
                 >
                     <FiPlus size={14} /> Kart Ekle
