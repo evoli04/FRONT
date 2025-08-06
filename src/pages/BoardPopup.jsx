@@ -1,4 +1,4 @@
-// BoardPopup.jsx (Yeni dosya)
+// BoardPopup.jsx
 import React, { useState } from 'react';
 import '../components/css/WorkspacePopup.css'; // Aynı CSS'i kullanıyoruz
 

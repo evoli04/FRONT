@@ -1,21 +1,29 @@
 // BoardPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FiPlus } from 'react-icons/fi';
 
-import List from './List.jsx';
+import List from './List.jsx'; // Varsayılan olarak list'in var olduğunu varsaydım
 import '../components/css/BoardPage.css';
-import Card from './Card.jsx';
+
+// Bu kısım, API'den liste ve kart verisi çekmek için
+// gerekli endpoint'leriniz olduğunda doldurulmalıdır.
+// Şimdilik statik veri ile devam ediyoruz.
 
 export default function BoardPage() {
-    const { boardName } = useParams();
+    const { boardId } = useParams();
     const navigate = useNavigate();
     const [lists, setLists] = useState([]);
     const [showListForm, setShowListForm] = useState(false);
     const [newListTitle, setNewListTitle] = useState('');
 
+    // Not: Normalde burada boardId'ye göre panonun listelerini çekeceksiniz.
+    // Örnek: useEffect(() => { fetchLists(boardId) }, [boardId]);
+
     const handleAddList = () => {
         if (!newListTitle.trim()) return;
+        // Not: Buraya liste oluşturma endpoint'i entegre edilmeli.
+        // Örnek: createList(boardId, newListTitle).then(newList => ...);
         setLists([...lists, {
             id: Date.now(),
             title: newListTitle,
@@ -28,7 +36,8 @@ export default function BoardPage() {
     return (
         <div className="board-page">
             <div className="board-header">
-                <h1>{decodeURIComponent(boardName)}</h1>
+                {/* <h1>{boardId}</h1> */}
+                <h1>Pano {boardId}</h1>
                 <button
                     className="return-button"
                     onClick={() => navigate('/workspace')}

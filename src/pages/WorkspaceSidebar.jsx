@@ -1,3 +1,4 @@
+// src/components/WorkspaceSidebar.jsx
 import React from 'react';
 import { FiSettings, FiLogOut, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -87,13 +88,15 @@ export default function WorkspaceSidebar({
 
                         {selectedWorkspace?.id === workspace.id && (
                             <div className="boards-container">
-                                {workspace.boards.map((board, idx) => (
+                                {workspace.boards.map((board) => ( // idx yerine doğrudan board objesini kullanıyoruz
                                     <div
-                                        key={idx}
+                                        key={board.id} // Hata düzeltildi: board objesinin 'id' özelliğini key olarak kullanın
                                         className="board-item"
-                                        onClick={() => console.log('Board clicked:', board)}
+                                        // Board'a tıklandığında BoardPage'e yönlendirme yapabilirsiniz
+                                        // onClick={() => navigate(`/board/${board.id}`)}
+                                        onClick={() => console.log('Board clicked:', board)} // Şimdilik console.log
                                     >
-                                        {board}
+                                        {board.title} {/* Hata düzeltildi: 'board' objesinin 'title' özelliğini render edin */}
                                     </div>
                                 ))}
                                 <button

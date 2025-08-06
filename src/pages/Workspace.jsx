@@ -1,55 +1,168 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FiPlus } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import WorkspaceSidebar from './WorkspaceSidebar';
-import WorkspacePopup from './WorkspacePopUp';
-import BoardPopup from './BoardPopup.jsx';
-import Settings2 from './Settings2.jsx';
-import { ThemeContext } from '../App'; // App.jsx'ten tema bağlamını import ediyoruz
+import WorkspacePopup from './WorkspacePopup';
+import Settings from './Settings';
+import BoardPopup from './BoardPopup';
+import Board from './Board.jsx';
+import { ThemeContext } from '../App';
+import { AuthContext } from '../context/AuthContext';
+import {
+    getWorkspacesByMember,
+    createWorkspace,
+    getBoardsByWorkspace,
+    createBoard
+} from '../services/api';
 import '../components/css/workspace.css';
 
 export default function Workspace() {
-    // ThemeContext'ten tema durumunu alıyoruz
-    const { theme } = useContext(ThemeContext); 
-    
-    const [workspaces, setWorkspaces] = useState([
-        { id: 1, name: "deneme", boards: ["pano1", "helal"] },
-        { id: 2, name: "CLUSTER", boards: [] }
-    ]);
+    const { theme } = useContext(ThemeContext);
+    const { user } = useContext(AuthContext);
+
+    const memberId = user?.memberId ? Number(user.memberId) : null;
+    const roleId = user?.roleId ? Number(user.roleId) : null;
+
+    console.log("AuthContext User:", user);
+    console.log("Processed Member ID:", memberId);
+    console.log("Processed Role ID:", roleId);
+
+    const [workspaces, setWorkspaces] = useState([]);
     const [selectedWorkspace, setSelectedWorkspace] = useState(null);
     const [showWorkspacePopup, setShowWorkspacePopup] = useState(false);
-    const [showBoardPopup, setShowBoardPopup] = useState(false);
     const [showAllWorkspaces, setShowAllWorkspaces] = useState(true);
     const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    const handleAddWorkspace = (name) => {
-        const newWorkspace = {
-            id: Date.now(),
-            name,
-            boards: [],
+    useEffect(() => {
+        if (memberId === null || isNaN(memberId)) {
+            console.log('User memberId not available or invalid, skipping workspace load.');
+            setIsLoading(false);
+            if (memberId === null) setError(null);
+            return;
+        }
+
+        const loadWorkspaces = async () => {
+            try {
+                setIsLoading(true);
+                const fetchedWorkspaces = await getWorkspacesByMember(memberId);
+                const mapped = (fetchedWorkspaces || []).map(ws => ({
+                    id: ws.workspaceId,
+                    name: ws.workspaceName,
+                    boards: ws.boards || []
+                }));
+                setWorkspaces(mapped);
+                setError(null);
+            } catch (err) {
+                console.error('Workspace load error:', err);
+                setError(
+                    err.response?.data?.message ||
+                    'Çalışma alanları yüklenirken hata oluştu'
+                );
+                setWorkspaces([]);
+            } finally {
+                setIsLoading(false);
+            }
         };
-        setWorkspaces([...workspaces, newWorkspace]);
-        setShowWorkspacePopup(false);
+
+        loadWorkspaces();
+    }, [memberId]);
+
+    useEffect(() => {
+        if (!selectedWorkspace?.id || memberId === null || isNaN(memberId)) return;
+
+        const loadBoards = async () => {
+            try {
+                const fetchedBoards = await getBoardsByWorkspace(selectedWorkspace.id);
+                // Panoları map'leyerek boardId'yi id'ye dönüştürün
+                const mappedBoards = fetchedBoards.map(board => ({
+                    id: board.boardId,
+                    title: board.title,
+                    bgColor: board.bgColor,
+                    memberId: board.memberId,
+                    workspaceId: board.workspaceId,
+                }));
+                setSelectedWorkspace(prev => ({ ...prev, boards: mappedBoards }));
+            } catch (error) {
+                console.error('Boards load error:', error);
+                alert('Panolar yüklenirken hata oluştu.');
+            }
+        };
+
+        loadBoards();
+    }, [selectedWorkspace?.id, memberId]);
+
+    const handleAddWorkspace = async (name) => {
+        try {
+            if (!name?.trim()) {
+                throw new Error('Çalışma alanı adı boş olamaz');
+            }
+            if (memberId === null || isNaN(memberId)) {
+                throw new Error('Kullanıcı bilgisi eksik veya geçersiz');
+            }
+
+            const response = await createWorkspace({
+                memberId: memberId,
+                workspaceName: name.trim()
+            });
+
+            setWorkspaces(prev => [
+                ...prev,
+                {
+                    id: response.workspaceId,
+                    name: response.workspaceName,
+                    boards: []
+                }
+            ]);
+            setShowWorkspacePopup(false);
+        } catch (error) {
+            console.error('Workspace oluşturma hatası:', {
+                error: error.response?.data || error.message,
+                sentData: { memberId: memberId, workspaceName: name }
+            });
+            setError(error.response?.data?.message || error.message);
+            alert(error.response?.data?.message || 'Çalışma alanı oluşturulurken hata oluştu');
+        }
     };
 
-    const handleAddBoard = (boardName) => {
-        if (!selectedWorkspace) return;
+    const handleAddBoard = async (boardData) => {
+        if (!selectedWorkspace) {
+            console.error("Selected workspace is missing for board creation.");
+            alert("Pano oluşturmak için bir çalışma alanı seçmelisiniz.");
+            return;
+        }
 
-        const updatedWorkspaces = workspaces.map(ws =>
-            ws.id === selectedWorkspace.id
-                ? { ...ws, boards: [...ws.boards, boardName] }
-                : ws
-        );
+        try {
+            const newBoardResponse = await createBoard({
+                workspaceId: selectedWorkspace.id,
+                title: boardData.title,
+                bgColor: boardData.bgColor,
+            });
 
-        setWorkspaces(updatedWorkspaces);
-        setSelectedWorkspace(updatedWorkspaces.find(ws => ws.id === selectedWorkspace.id));
-        setShowBoardPopup(false);
-    };
+            // API'den dönen boardId'yi frontend'in beklediği id'ye dönüştürme
+            const newBoard = {
+                id: newBoardResponse.boardId,
+                title: newBoardResponse.title,
+                bgColor: newBoardResponse.bgColor,
+                memberId: newBoardResponse.memberId,
+                workspaceId: newBoardResponse.workspaceId,
+            };
 
-    const handleBoardClick = (boardName) => {
-        if (!selectedWorkspace) return;
-        navigate(`/board/${selectedWorkspace.id}/${encodeURIComponent(boardName)}`);
+            setWorkspaces(prev => prev.map(ws =>
+                ws.id === selectedWorkspace.id
+                    ? { ...ws, boards: [...(ws.boards || []), newBoard] }
+                    : ws
+            ));
+            setSelectedWorkspace(prev => ({
+                ...prev,
+                boards: [...(prev.boards || []), newBoard]
+            }));
+        } catch (error) {
+            console.error('Board creation error:', error);
+            alert(error.response?.data?.message || 'Pano oluşturulurken hata oluştu');
+        }
     };
 
     const handleWorkspaceSelect = (workspace) => {
@@ -66,19 +179,17 @@ export default function Workspace() {
                 setSelectedWorkspace(null);
                 setShowAllWorkspaces(true);
             }
+            alert('Çalışma alanı silindi (Bu işlem sadece UI tarafında yapıldı, API entegrasyonu gereklidir).');
         }
     };
 
-    const handleOpenSettings = () => {
-        setShowSettingsDrawer(true);
-    };
+    const handleOpenSettings = () => setShowSettingsDrawer(true);
+    const handleCloseSettings = () => setShowSettingsDrawer(false);
 
-    const handleCloseSettings = () => {
-        setShowSettingsDrawer(false);
-    };
+    if (isLoading) return <div className='loading'>Yükleniyor...</div>;
+    if (error) return <div className='error'>{error}</div>;
 
     return (
-        // Tema bilgisini `data-theme` özniteliği olarak ekliyoruz
         <div className="workspace-container" data-theme={theme}>
             <WorkspaceSidebar
                 workspaces={workspaces}
@@ -89,10 +200,9 @@ export default function Workspace() {
                     setShowAllWorkspaces(true);
                 }}
                 onAddWorkspaceClick={() => setShowWorkspacePopup(true)}
-                onAddBoardClick={() => selectedWorkspace && setShowBoardPopup(true)}
                 onDeleteWorkspace={handleDeleteWorkspace}
                 onOpenSettings={handleOpenSettings}
-                isDarkTheme={theme === 'dark'} // 👈 Tema durumunu prop olarak iletiyoruz
+                isDarkTheme={theme === 'dark'}
             />
 
             <main className="workspace-main-content">
@@ -107,7 +217,7 @@ export default function Workspace() {
                                     onClick={() => handleWorkspaceSelect(workspace)}
                                 >
                                     <h3>{workspace.name}</h3>
-                                    <p>{workspace.boards.length} Pano</p>
+                                    <p>{workspace.boards?.length || 0} Pano</p>
                                 </div>
                             ))}
                             <div
@@ -122,24 +232,11 @@ export default function Workspace() {
                 ) : selectedWorkspace ? (
                     <div className="board-view">
                         <h2 className="workspace-name">{selectedWorkspace.name}</h2>
-                        <div className="boards-grid">
-                            {selectedWorkspace.boards.map((board, index) => (
-                                <div
-                                    key={index}
-                                    className="board-card"
-                                    onClick={() => handleBoardClick(board)}
-                                >
-                                    <div className="board-title">{board}</div>
-                                </div>
-                            ))}
-                            <div
-                                className="board-card add-board"
-                                onClick={() => setShowBoardPopup(true)}
-                            >
-                                <FiPlus size={24} />
-                                <span>Pano Ekle</span>
-                            </div>
-                        </div>
+                        <Board
+                            boards={selectedWorkspace.boards}
+                            workspaceId={selectedWorkspace.id}
+                            onCreateBoardSubmit={handleAddBoard}
+                        />
                     </div>
                 ) : null}
             </main>
@@ -151,14 +248,7 @@ export default function Workspace() {
                 />
             )}
 
-            {showBoardPopup && (
-                <BoardPopup
-                    onClose={() => setShowBoardPopup(false)}
-                    onSubmit={handleAddBoard}
-                />
-            )}
-            
-            <Settings2 open={showSettingsDrawer} onClose={handleCloseSettings} />
+            <Settings open={showSettingsDrawer} onClose={handleCloseSettings} />
         </div>
     );
 }

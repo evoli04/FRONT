@@ -90,8 +90,9 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        {/* DÜZELTİLEN KISIM: BoardPage rotası sadece boardId bekleyecek */}
         <Route
-          path="/board/:workspaceId/:boardName"
+          path="/board/:boardId" // Sadece boardId parametresini bekliyoruz
           element={
             <ProtectedRoute>
               <BoardPage />

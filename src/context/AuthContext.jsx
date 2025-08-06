@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -30,9 +31,10 @@ export const AuthProvider = ({ children }) => {
     
   }, []);
 
-  
-
   const login = (userData, token) => {
+    // BURAYA EKLEYİN: userData'nın içeriğini konsola yazdırın
+    console.log("Login function received userData:", userData);
+
     setUser(userData);
     setToken(token);
     localStorage.setItem("token", token);
