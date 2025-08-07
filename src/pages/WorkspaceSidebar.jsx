@@ -1,5 +1,4 @@
-// src/components/WorkspaceSidebar.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { FiSettings, FiLogOut, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import '../components/css/WorkspaceSidebar.css';
@@ -29,8 +28,16 @@ export default function WorkspaceSidebar({
     isDarkTheme // Tema durumunu belirleyen yeni prop
 }) {
     const navigate = useNavigate();
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-    const handleLogout = () => navigate('/login');
+    const handleLogout = () => setShowLogoutModal(true);
+
+    const confirmLogout = () => {
+        setShowLogoutModal(false);
+        navigate('/login');
+    };
+
+    const cancelLogout = () => setShowLogoutModal(false);
 
     const handleWorkspaceClick = (workspace) => {
         onSelectWorkspace(selectedWorkspace?.id === workspace.id ? null : workspace);
@@ -41,8 +48,6 @@ export default function WorkspaceSidebar({
         onDeleteWorkspace(id);
     };
 
-    // 'isDarkTheme' prop'una göre CSS sınıfını dinamik olarak belirliyoruz.
-    // Koyu tema için 'sidebar dark' sınıfını, açık tema için sadece 'sidebar' sınıfını atıyoruz.
     const sidebarClass = isDarkTheme ? 'sidebar dark' : 'sidebar';
 
     return (
@@ -88,15 +93,13 @@ export default function WorkspaceSidebar({
 
                         {selectedWorkspace?.id === workspace.id && (
                             <div className="boards-container">
-                                {workspace.boards.map((board) => ( // idx yerine doğrudan board objesini kullanıyoruz
+                                {workspace.boards.map((board) => (
                                     <div
-                                        key={board.id} // Hata düzeltildi: board objesinin 'id' özelliğini key olarak kullanın
+                                        key={board.id}
                                         className="board-item"
-                                        // Board'a tıklandığında BoardPage'e yönlendirme yapabilirsiniz
-                                        // onClick={() => navigate(`/board/${board.id}`)}
-                                        onClick={() => console.log('Board clicked:', board)} // Şimdilik console.log
+                                        onClick={() => console.log('Board clicked:', board)}
                                     >
-                                        {board.title} {/* Hata düzeltildi: 'board' objesinin 'title' özelliğini render edin */}
+                                        {board.title}
                                     </div>
                                 ))}
                                 <button
@@ -110,6 +113,19 @@ export default function WorkspaceSidebar({
                     </div>
                 ))}
             </div>
+
+            {/* Çıkış Modalı */}
+            {showLogoutModal && (
+                <div className="custom-modal-overlay">
+                    <div className="custom-modal">
+                        <p>Çıkış yapmak istediğinize emin misiniz?</p>
+                        <div className="modal-actions">
+                            <button onClick={confirmLogout} className="modal-ok">Evet</button>
+                            <button onClick={cancelLogout} className="modal-cancel">Vazgeç</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

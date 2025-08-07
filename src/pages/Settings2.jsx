@@ -9,7 +9,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeContext } from '../App';
 import { AuthContext } from '../context/AuthContext';
-import { logout } from '../services/auth';
+import { logout } from '../services/auth'; // Eski logout servisi
+import { resetPassword } from '../services/api'; // Yeni eklenen import
 import "../components/css/Settings.css";
 
 // Desteklenen diller
@@ -67,16 +68,27 @@ const Settings2 = ({ open, onClose }) => {
     localStorage.setItem('language', newLang);
   };
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast.error(t('passwordNotMatch'));
       return;
     }
-    toast.success(t('passwordChanged'));
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+
+    try {
+      // resetPassword endpoint'ini çağırıyoruz
+      await resetPassword(currentPassword, newPassword);
+      
+      // Sadece API başarılı bir yanıt döndürdüğünde bu kısım çalışır
+      toast.success(t('passwordChanged'));
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      // Hata mesajını API'den alıyoruz veya varsayılan mesajı gösteriyoruz
+      console.error('Şifre değiştirme hatası:', error);
+      toast.error(error.message); // Hata mesajını tostify'a iletiyoruz
+    }
   };
 
   const handleProfileChange = (e) => {

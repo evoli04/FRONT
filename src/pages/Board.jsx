@@ -8,25 +8,24 @@ export default function Board({ boards, onCreateBoardSubmit, workspaceId }) {
     const [showBoardPopup, setShowBoardPopup] = useState(false);
     const navigate = useNavigate();
 
-    // BoardPopup'tan gelen veriyi işleyen fonksiyon
     const handleBoardPopupSubmit = async (boardTitle, bgColor) => {
         await onCreateBoardSubmit({
             workspaceId,
             title: boardTitle,
-            bgColor: bgColor || '#ADD8E6', // Varsayılan renk
+            bgColor: bgColor || '#ADD8E6',
         });
         setShowBoardPopup(false);
     };
 
     // Panoya tıklanınca yönlendirme yapan fonksiyon
     const handleBoardClick = (boardId) => {
+        console.log("Tıklanan panonun ID'si:", boardId); // Bu satırı ekledim
         if (!boardId) {
-            console.error("Board ID is missing for navigation.");
+            console.error("Pano ID is missing for navigation.");
             alert("Pano detayına gitmek için pano ID'si eksik.");
             return;
         }
-       navigate(`/board/${boardId}`);
-
+        navigate(`/board/${boardId}`);
     };
 
     return (
@@ -62,3 +61,4 @@ export default function Board({ boards, onCreateBoardSubmit, workspaceId }) {
         </div>
     );
 }
+

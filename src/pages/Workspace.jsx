@@ -18,14 +18,16 @@ import '../components/css/workspace.css';
 
 export default function Workspace() {
     const { theme } = useContext(ThemeContext);
-    const { user } = useContext(AuthContext);
+    const { user, updateUser } = useContext(AuthContext);
 
     const memberId = user?.memberId ? Number(user.memberId) : null;
     const roleId = user?.roleId ? Number(user.roleId) : null;
+    const role = user?.role || 'user';
 
     console.log("AuthContext User:", user);
     console.log("Processed Member ID:", memberId);
     console.log("Processed Role ID:", roleId);
+    console.log("Processed Role:", role);
 
     const [workspaces, setWorkspaces] = useState([]);
     const [selectedWorkspace, setSelectedWorkspace] = useState(null);
@@ -51,7 +53,9 @@ export default function Workspace() {
                 const mapped = (fetchedWorkspaces || []).map(ws => ({
                     id: ws.workspaceId,
                     name: ws.workspaceName,
-                    boards: ws.boards || []
+                    boards: ws.boards || [],
+                    roleId: ws.roleId,
+                    roleName: ws.roleName,
                 }));
                 setWorkspaces(mapped);
                 setError(null);
@@ -76,7 +80,6 @@ export default function Workspace() {
         const loadBoards = async () => {
             try {
                 const fetchedBoards = await getBoardsByWorkspace(selectedWorkspace.id);
-                // Panoları map'leyerek boardId'yi id'ye dönüştürün
                 const mappedBoards = fetchedBoards.map(board => ({
                     id: board.boardId,
                     title: board.title,
@@ -87,7 +90,6 @@ export default function Workspace() {
                 setSelectedWorkspace(prev => ({ ...prev, boards: mappedBoards }));
             } catch (error) {
                 console.error('Boards load error:', error);
-                alert('Panolar yüklenirken hata oluştu.');
             }
         };
 
@@ -108,12 +110,29 @@ export default function Workspace() {
                 workspaceName: name.trim()
             });
 
+            // <<< KRİTİK HATA AYIKLAMA KISMI >>>
+            console.log("API'den gelen ham yanıt:", response);
+
+            if (response && response.roleId && response.roleName) {
+                const updatedUser = { 
+                    ...user, 
+                    roleId: response.roleId, 
+                    role: response.roleName 
+                };
+                updateUser(updatedUser);
+                console.log("AuthContext, yeni kullanıcı verileriyle başarıyla güncellendi:", updatedUser);
+            } else {
+                console.warn("API yanıtı roleId veya roleName içermiyor. Kullanıcı rolü güncellenemedi.");
+            }
+
             setWorkspaces(prev => [
                 ...prev,
                 {
                     id: response.workspaceId,
                     name: response.workspaceName,
-                    boards: []
+                    boards: [],
+                    roleId: response.roleId,
+                    roleName: response.roleName,
                 }
             ]);
             setShowWorkspacePopup(false);
@@ -123,14 +142,17 @@ export default function Workspace() {
                 sentData: { memberId: memberId, workspaceName: name }
             });
             setError(error.response?.data?.message || error.message);
-            alert(error.response?.data?.message || 'Çalışma alanı oluşturulurken hata oluştu');
         }
     };
 
     const handleAddBoard = async (boardData) => {
         if (!selectedWorkspace) {
             console.error("Selected workspace is missing for board creation.");
-            alert("Pano oluşturmak için bir çalışma alanı seçmelisiniz.");
+            return;
+        }
+
+        if (selectedWorkspace.roleName !== 'OWNER') {
+            console.warn("Kullanıcının pano oluşturma yetkisi yok (Role:", selectedWorkspace.roleName, ")");
             return;
         }
 
@@ -141,7 +163,6 @@ export default function Workspace() {
                 bgColor: boardData.bgColor,
             });
 
-            // API'den dönen boardId'yi frontend'in beklediği id'ye dönüştürme
             const newBoard = {
                 id: newBoardResponse.boardId,
                 title: newBoardResponse.title,
@@ -161,7 +182,6 @@ export default function Workspace() {
             }));
         } catch (error) {
             console.error('Board creation error:', error);
-            alert(error.response?.data?.message || 'Pano oluşturulurken hata oluştu');
         }
     };
 
@@ -171,16 +191,7 @@ export default function Workspace() {
     };
 
     const handleDeleteWorkspace = (workspaceId) => {
-        if (window.confirm('Bu çalışma alanını ve tüm panolarını silmek istediğinize emin misiniz?')) {
-            const updatedWorkspaces = workspaces.filter(ws => ws.id !== workspaceId);
-            setWorkspaces(updatedWorkspaces);
-
-            if (selectedWorkspace?.id === workspaceId) {
-                setSelectedWorkspace(null);
-                setShowAllWorkspaces(true);
-            }
-            alert('Çalışma alanı silindi (Bu işlem sadece UI tarafında yapıldı, API entegrasyonu gereklidir).');
-        }
+        // ... (Silme işlemini gerçekleştirecek kod)
     };
 
     const handleOpenSettings = () => setShowSettingsDrawer(true);
@@ -232,11 +243,15 @@ export default function Workspace() {
                 ) : selectedWorkspace ? (
                     <div className="board-view">
                         <h2 className="workspace-name">{selectedWorkspace.name}</h2>
-                        <Board
-                            boards={selectedWorkspace.boards}
-                            workspaceId={selectedWorkspace.id}
-                            onCreateBoardSubmit={handleAddBoard}
-                        />
+                        {selectedWorkspace.roleName === 'OWNER' ? (
+                            <Board
+                                boards={selectedWorkspace.boards}
+                                workspaceId={selectedWorkspace.id}
+                                onCreateBoardSubmit={handleAddBoard}
+                            />
+                        ) : (
+                            <p>Bu çalışma alanında pano oluşturma yetkiniz bulunmamaktadır.</p>
+                        )}
                     </div>
                 ) : null}
             </main>

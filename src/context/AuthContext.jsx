@@ -1,7 +1,5 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-
 
 export const AuthContext = createContext();
 
@@ -19,7 +17,6 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       setToken(storedToken);
       
-      // Kullanıcı bilgisi varsa onu da yükle
       if (storedUser) {
         try {
           setUser(JSON.parse(storedUser));
@@ -28,13 +25,11 @@ export const AuthProvider = ({ children }) => {
         }
       }
     }
-    
+    setIsLoading(false);
   }, []);
 
   const login = (userData, token) => {
-    // BURAYA EKLEYİN: userData'nın içeriğini konsola yazdırın
     console.log("Login function received userData:", userData);
-
     setUser(userData);
     setToken(token);
     localStorage.setItem("token", token);
@@ -48,8 +43,15 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
   };
 
+  // Yeni updateUser fonksiyonu: Kullanıcı bilgilerini günceller ve localStorage'a kaydeder.
+  const updateUser = (newUserData) => {
+    setUser(newUserData);
+    localStorage.setItem("user", JSON.stringify(newUserData));
+    console.log("AuthContext successfully updated with new user data:", newUserData);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
