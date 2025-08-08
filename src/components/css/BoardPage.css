@@ -1,7 +1,10 @@
-/* BoardPage.css */
+/* src/components/css/BoardPage.css */
+
+/* BoardPage ana konteyneri */
 .board-page {
     padding: 20px;
     min-height: 100vh;
+    /* Panonun modern arkaplanı */
     background: linear-gradient(135deg,
             rgba(0, 121, 191, 0.9) 0%,
             rgba(80, 103, 197, 0.9) 50%,
@@ -12,6 +15,10 @@
     color: white;
     position: relative;
     overflow: hidden;
+    box-sizing: border-box;
+    /* padding'in toplam boyuta dahil olması için */
+    display: flex;
+    flex-direction: column;
 }
 
 .board-page::before {
@@ -27,14 +34,20 @@
     z-index: 0;
 }
 
+/* Header bölümü - Butonları sağa hizalar ve şeffaflık efekti ekler */
 .board-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 10px 20px;
     margin-bottom: 20px;
-    padding: 0 10px;
     position: relative;
     z-index: 1;
+    background-color: rgba(0, 0, 0, 0.2);
+    /* Daha şeffaf bir arka plan */
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .board-header h1 {
@@ -44,7 +57,16 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.return-button {
+/* Butonları içeren yeni div - `board-actions` */
+.board-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Çalışma Alanlarına Dön ve Üye Ekle butonları için ortak stiller */
+.return-button,
+.add-member-button {
     background-color: rgba(255, 255, 255, 0.25);
     color: white;
     border: none;
@@ -61,17 +83,21 @@
     gap: 8px;
 }
 
-.return-button:hover {
+.return-button:hover,
+.add-member-button:hover {
     background-color: rgba(255, 255, 255, 0.35);
     transform: translateY(-1px);
 }
 
+/* Liste konteyneri */
 .lists-container {
     display: flex;
     gap: 16px;
     align-items: flex-start;
     padding: 10px;
     overflow-x: auto;
+    flex: 1;
+    /* Kontainerın esnek olmasını sağlar */
     height: calc(100vh - 120px);
     position: relative;
     z-index: 1;
@@ -96,11 +122,25 @@
     background: rgba(255, 255, 255, 0.4);
 }
 
+/* Liste konteyneri ve ekleme formu stilleri */
+.list-container {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-width: 272px;
+    /* Liste genişliğini korur */
+}
+
+.list-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
 .add-list-container {
     background-color: rgba(255, 255, 255, 0.25);
-    min-width: 272px;
-    border-radius: 12px;
-    backdrop-filter: blur(5px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
 }
@@ -190,17 +230,26 @@
     transform: scale(1.1);
 }
 
-/* Listeler için modern efekt */
-.list-container {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+/* src/components/css/BoardPage.css */
+
+.board-actions {
+    display: flex;
+    gap: 10px;
+    /* Butonlar arasına boşluk bırakır */
 }
 
-.list-container:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+.view-members-button {
+    padding: 8px 16px;
+    background-color: #3f51b5;
+    /* Örnek bir renk */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.view-members-button:hover {
+    background-color: #303f9f;
 }

@@ -19,19 +19,19 @@ export const forgotPassword = email =>
     })
 
 export const resetPassword = async (currentPassword, newPassword) => {
-  try {
+  try {
     // api yerine apiClient kullanılıyor
-    const response = await apiClient.post('/api/auth/reset-password', {
-      currentPassword,
-      newPassword,
-      confirmPassword: newPassword,
-    });
-    return response.data;
-  } catch (error) {
-    const errorMessage = error.response?.data?.message || 'Şifre değiştirme işlemi sırasında bir hata oluştu.';
-    console.error('API Error:', error.response);
-    throw new Error(errorMessage);
-  }
+    const response = await apiClient.post('/api/auth/reset-password', {
+      currentPassword,
+      newPassword,
+      confirmPassword: newPassword,
+    });
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.message || 'Şifre değiştirme işlemi sırasında bir hata oluştu.';
+    console.error('API Error:', error.response);
+    throw new Error(errorMessage);
+  }
 };
 
 // ——— Google Auth ———
@@ -208,22 +208,22 @@ export const removeBoardMember = (boardId, memberId, requesterId) =>
 // ——— Lists ———
 // BİR PANODAKİ TÜM LİSTELERİ GETİRİR (endpoint görselinize göre düzenlendi)
 export const getListsByBoard = (boardId) =>
-    apiClient.get(`/api/lists/board/${boardId}`).then(res => res.data);
+  apiClient.get(`/api/lists/board/${boardId}`).then(res => res.data);
 
 // TEK BİR LİSTEYİ GÜNCELLE
 export const updateList = (id, data) =>
-    apiClient.put(`/api/lists/${id}`, data).then(res => res.data);
+  apiClient.put(`/api/lists/${id}`, data).then(res => res.data);
 
 // TEK BİR LİSTEYİ SİL
 export const deleteList = id =>
-    apiClient.delete(`/api/lists/${id}`).then(res => res.data);
+  apiClient.delete(`/api/lists/${id}`).then(res => res.data);
 
 // TÜM LİSTELERİ GETİR (Genelde kullanılmaz, ancak API'de mevcut)
 export const getLists = () => apiClient.get('/api/lists').then(res => res.data);
 
 // YENİ LİSTE OLUŞTUR
 export const createList = data =>
-    apiClient.post('/api/lists', data).then(res => res.data);
+  apiClient.post('/api/lists', data).then(res => res.data);
 
 // ——— Cards ———
 export const getCard = id =>

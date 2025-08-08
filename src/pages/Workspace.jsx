@@ -1,8 +1,9 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { FiPlus } from 'react-icons/fi';
+import { FiPlus, FiUsers } from 'react-icons/fi'; // FiUsers ikonunu ekliyoruz
 import { useNavigate } from 'react-router-dom';
 import WorkspaceSidebar from './WorkspaceSidebar';
 import WorkspacePopup from './WorkspacePopup';
+import WorkspaceMemberAddPopup from './WorkspaceMemberAddPopup';
 import Settings from './Settings';
 import BoardPopup from './BoardPopup';
 import Board from './Board.jsx';
@@ -12,7 +13,8 @@ import {
     getWorkspacesByMember,
     createWorkspace,
     getBoardsByWorkspace,
-    createBoard
+    createBoard,
+    inviteWorkspaceMember
 } from '../services/api';
 import '../components/css/workspace.css';
 
@@ -22,16 +24,17 @@ export default function Workspace() {
 
     const memberId = user?.memberId ? Number(user.memberId) : null;
     const roleId = user?.roleId ? Number(user.roleId) : null;
-    const role = user?.role || 'user';
+    const roleName = user?.roleName || 'user';
 
     console.log("AuthContext User:", user);
     console.log("Processed Member ID:", memberId);
     console.log("Processed Role ID:", roleId);
-    console.log("Processed Role:", role);
+    console.log("Processed Role Name:", roleName);
 
     const [workspaces, setWorkspaces] = useState([]);
     const [selectedWorkspace, setSelectedWorkspace] = useState(null);
     const [showWorkspacePopup, setShowWorkspacePopup] = useState(false);
+    const [showMemberAddPopup, setShowMemberAddPopup] = useState(false);
     const [showAllWorkspaces, setShowAllWorkspaces] = useState(true);
     const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -110,14 +113,13 @@ export default function Workspace() {
                 workspaceName: name.trim()
             });
 
-            // <<< KRİTİK HATA AYIKLAMA KISMI >>>
             console.log("API'den gelen ham yanıt:", response);
 
             if (response && response.roleId && response.roleName) {
-                const updatedUser = { 
-                    ...user, 
-                    roleId: response.roleId, 
-                    role: response.roleName 
+                const updatedUser = {
+                    ...user,
+                    roleId: response.roleId,
+                    roleName: response.roleName
                 };
                 updateUser(updatedUser);
                 console.log("AuthContext, yeni kullanıcı verileriyle başarıyla güncellendi:", updatedUser);
@@ -185,7 +187,34 @@ export default function Workspace() {
         }
     };
 
+    const handleInviteMember = async (email, role) => {
+        try {
+            if (!selectedWorkspace) {
+                throw new Error('No workspace selected');
+            }
+
+            const response = await inviteWorkspaceMember({
+                workspaceId: selectedWorkspace.id,
+                email,
+                role
+            });
+
+            // Refresh workspace data or show success message
+            return response;
+        } catch (error) {
+            console.error('Member invitation error:', error);
+            throw error;
+        }
+    };
+
     const handleWorkspaceSelect = (workspace) => {
+        const updatedUser = {
+            ...user,
+            roleId: workspace.roleId,
+            roleName: workspace.roleName
+        };
+        updateUser(updatedUser);
+
         setSelectedWorkspace(workspace);
         setShowAllWorkspaces(false);
     };
@@ -196,6 +225,13 @@ export default function Workspace() {
 
     const handleOpenSettings = () => setShowSettingsDrawer(true);
     const handleCloseSettings = () => setShowSettingsDrawer(false);
+
+    // Yeni eklenen yönlendirme fonksiyonu
+    const handleViewMembers = () => {
+        if (selectedWorkspace) {
+            navigate(`/workspace/${selectedWorkspace.id}/members`);
+        }
+    };
 
     if (isLoading) return <div className='loading'>Yükleniyor...</div>;
     if (error) return <div className='error'>{error}</div>;
@@ -209,6 +245,10 @@ export default function Workspace() {
                 onShowAllWorkspaces={() => {
                     setSelectedWorkspace(null);
                     setShowAllWorkspaces(true);
+                    if (user && user.memberId) {
+                        const defaultUser = { ...user, roleId: user.initialRoleId, roleName: user.initialRoleName };
+                        updateUser(defaultUser);
+                    }
                 }}
                 onAddWorkspaceClick={() => setShowWorkspacePopup(true)}
                 onDeleteWorkspace={handleDeleteWorkspace}
@@ -242,7 +282,26 @@ export default function Workspace() {
                     </div>
                 ) : selectedWorkspace ? (
                     <div className="board-view">
-                        <h2 className="workspace-name">{selectedWorkspace.name}</h2>
+                        <div className="workspace-header">
+                            <h2 className="workspace-name">{selectedWorkspace.name}</h2>
+                            <div className="workspace-actions">
+                                {/* Yeni buton burada */}
+                                <button
+                                    className="view-members-btn"
+                                    onClick={handleViewMembers}
+                                >
+                                    <FiUsers /> Üyeleri Görüntüle
+                                </button>
+                                {selectedWorkspace.roleName === 'OWNER' && (
+                                    <button
+                                        className="add-member-btn"
+                                        onClick={() => setShowMemberAddPopup(true)}
+                                    >
+                                        <FiPlus /> Üye Davet Et
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                         {selectedWorkspace.roleName === 'OWNER' ? (
                             <Board
                                 boards={selectedWorkspace.boards}
@@ -260,6 +319,14 @@ export default function Workspace() {
                 <WorkspacePopup
                     onClose={() => setShowWorkspacePopup(false)}
                     onSubmit={handleAddWorkspace}
+                />
+            )}
+
+            {showMemberAddPopup && selectedWorkspace && (
+                <WorkspaceMemberAddPopup
+                    onClose={() => setShowMemberAddPopup(false)}
+                    onSubmit={handleInviteMember}
+                    workspaceId={selectedWorkspace.id}
                 />
             )}
 

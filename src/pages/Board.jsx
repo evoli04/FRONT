@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { FiPlus } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import '../components/css/Board.css';
 import BoardPopup from './BoardPopup.jsx';
+import { ThemeContext } from '../App';
+import '../components/css/Board.css';
 
 export default function Board({ boards, onCreateBoardSubmit, workspaceId }) {
     const [showBoardPopup, setShowBoardPopup] = useState(false);
     const navigate = useNavigate();
+    const { theme } = useContext(ThemeContext);
 
     const handleBoardPopupSubmit = async (boardTitle, bgColor) => {
         await onCreateBoardSubmit({
@@ -17,9 +19,7 @@ export default function Board({ boards, onCreateBoardSubmit, workspaceId }) {
         setShowBoardPopup(false);
     };
 
-    // Panoya tıklanınca yönlendirme yapan fonksiyon
     const handleBoardClick = (boardId) => {
-        console.log("Tıklanan panonun ID'si:", boardId); // Bu satırı ekledim
         if (!boardId) {
             console.error("Pano ID is missing for navigation.");
             alert("Pano detayına gitmek için pano ID'si eksik.");
@@ -29,28 +29,30 @@ export default function Board({ boards, onCreateBoardSubmit, workspaceId }) {
     };
 
     return (
-        <div className="board-list">
-            {boards && boards.length > 0 ? (
-                <ul>
-                    {boards.map((board) => (
-                        <li
+        <div className="board-list" data-theme={theme}>
+            <div className="boards-grid">
+                {boards && boards.length > 0 ? (
+                    boards.map((board) => (
+                        <div
                             key={board.id}
+                            className="board-card"
                             onClick={() => handleBoardClick(board.id)}
-                            className="board-item"
-                            style={{ backgroundColor: board.bgColor || '#ADD8E6' }}
-                        >
-                            <span>{board.title}</span>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <p className="no-boards-message">Bu çalışma alanına ait pano bulunamadı.</p>
-            )}
 
-            <button className="add-board" onClick={() => setShowBoardPopup(true)}>
-                <FiPlus size={14} /> Pano Ekle
-            </button>
-            <div className="divider"></div>
+                        >
+                            <h3>{board.title}</h3>
+                        </div>
+                    ))
+                ) : (
+                    <p className="no-boards-message">Bu çalışma alanına ait pano bulunamadı.</p>
+                )}
+                <div
+                    className="board-card add-board-card"
+                    onClick={() => setShowBoardPopup(true)}
+                >
+                    <FiPlus size={24} />
+                    <span>Pano Ekle</span>
+                </div>
+            </div>
 
             {showBoardPopup && (
                 <BoardPopup
@@ -61,4 +63,3 @@ export default function Board({ boards, onCreateBoardSubmit, workspaceId }) {
         </div>
     );
 }
-

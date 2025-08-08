@@ -1,37 +1,38 @@
 /* Genel Ayarlar ve Tema Değişkenleri */
 :root {
-  /* Açık Tema (Varsayılan) */
-  --bg-color-light: linear-gradient(315deg, #6e45e2, #89d4cf, #6e45e2, #89d4cf, #6e45e2);
-  --text-color-light: #2c3e50;
-  --card-bg-light: rgba(255, 255, 255, 0.85);
-  --card-bg-hover-light: rgba(255, 255, 255, 0.95);
-  --card-border-light: rgba(255, 255, 255, 0.2);
-  --add-card-bg-light: rgba(255, 255, 255, 0.7);
-  --add-card-border-light: rgba(255, 255, 255, 0.5);
-  --add-card-hover-bg-light: rgba(255, 255, 255, 0.85);
-  --add-card-icon-light: #6e45e2;
-  --header-text-color-light: #fff;
+    /* Açık Tema (Varsayılan) */
+    --bg-color-light: linear-gradient(315deg, #6e45e2, #89d4cf, #6e45e2, #89d4cf, #6e45e2);
+    --text-color-light: #2c3e50;
+    --card-bg-light: rgba(255, 255, 255, 0.85);
+    --card-bg-hover-light: rgba(255, 255, 255, 0.95);
+    --card-border-light: rgba(255, 255, 255, 0.2);
+    --add-card-bg-light: rgba(255, 255, 255, 0.7);
+    --add-card-border-light: rgba(255, 255, 255, 0.5);
+    --add-card-hover-bg-light: rgba(255, 255, 255, 0.85);
+    --add-card-icon-light: #6e45e2;
+    --header-text-color-light: #fff;
 }
 
 /* Koyu Tema Değişkenleri */
 [data-theme="dark"] {
-  --bg-color-dark: linear-gradient(315deg, #1a237e, #283593, #1a237e, #283593, #1a237e);
-  --text-color-dark: #ecf0f1;
-  --card-bg-dark: rgba(44, 62, 80, 0.85);
-  --card-bg-hover-dark: rgba(52, 73, 94, 0.95);
-  --card-border-dark: rgba(44, 62, 80, 0.4);
-  --add-card-bg-dark: rgba(44, 62, 80, 0.7);
-  --add-card-border-dark: rgba(44, 62, 80, 0.5);
-  --add-card-hover-bg-dark: rgba(52, 73, 94, 0.85);
-  --add-card-icon-dark: #fff;
-  --header-text-color-dark: #ecf0f1;
+    --bg-color-dark: linear-gradient(315deg, #1a237e, #283593, #1a237e, #283593, #1a237e);
+    --text-color-dark: #ecf0f1;
+    --card-bg-dark: rgba(44, 62, 80, 0.85);
+    --card-bg-hover-dark: rgba(52, 73, 94, 0.95);
+    --card-border-dark: rgba(44, 62, 80, 0.4);
+    --add-card-bg-dark: rgba(44, 62, 80, 0.7);
+    --add-card-border-dark: rgba(44, 62, 80, 0.5);
+    --add-card-hover-bg-dark: rgba(52, 73, 94, 0.85);
+    --add-card-icon-dark: #fff;
+    --header-text-color-dark: #ecf0f1;
 }
 
 /* WORKSPACE CONTAINER */
 .workspace-container {
     display: flex;
     min-height: 100vh;
-    background: var(--bg-color-light); /* Açık tema arka planı */
+    background: var(--bg-color-light);
+    /* Açık tema arka planı */
     animation: gradientFlow 16s ease infinite;
     background-size: 300% 300%;
     position: relative;
@@ -62,14 +63,27 @@
 
 
 @keyframes gradientFlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 @keyframes rotateGradient {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .workspace-main-content {
@@ -83,24 +97,26 @@
 .workspace-name {
     text-align: center;
     margin-bottom: 2rem;
-    color: var(--header-text-color-light); 
+    color: var(--header-text-color-light);
     font-size: 1.8rem;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] .workspace-name {
-    color: var(--header-text-color-dark); 
+    color: var(--header-text-color-dark);
     text-shadow: none;
 }
 
-.boards-grid, .workspaces-grid {
+.boards-grid,
+.workspaces-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1.5rem;
     margin-top: 1rem;
 }
 
-.board-card, .workspace-card {
+.board-card,
+.workspace-card {
     background-color: var(--card-bg-light);
     border-radius: 8px;
     padding: 1.5rem;
@@ -121,7 +137,8 @@
     border: 1px solid var(--card-border-dark);
 }
 
-.board-card:hover, .workspace-card:hover {
+.board-card:hover,
+.workspace-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     background-color: var(--card-bg-hover-light);
@@ -132,7 +149,8 @@
     background-color: var(--card-bg-hover-dark);
 }
 
-.board-title, .workspace-card h3 {
+.board-title,
+.workspace-card h3 {
     font-size: 1rem;
     color: var(--text-color-light);
     text-align: center;
@@ -151,7 +169,8 @@
     text-align: center;
 }
 
-.add-board, .add-workspace {
+.add-board,
+.add-workspace {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -170,9 +189,10 @@
     background-color: var(--add-card-bg-dark);
 }
 
-.add-board:hover, .add-workspace:hover {
+.add-board:hover,
+.add-workspace:hover {
     background-color: var(--add-card-hover-bg-light);
-    border-color: rgba(255, 255, 255, 0.8);
+
 }
 
 [data-theme="dark"] .add-board:hover,
@@ -181,7 +201,8 @@
     border-color: rgba(44, 62, 80, 0.8);
 }
 
-.add-board svg, .add-workspace svg {
+.add-board svg,
+.add-workspace svg {
     margin-bottom: 0.5rem;
     color: var(--add-card-icon-light);
 }
@@ -201,4 +222,69 @@
 [data-theme="dark"] .workspace-view h2 {
     color: var(--header-text-color-dark);
     text-shadow: none;
+}
+
+.workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.add-member-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-member-btn:hover {
+    background-color: #45a049;
+}
+
+/* src/components/css/workspace.css - Eklenecek yeni stiller */
+
+.workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    /* Diğer stiller... */
+}
+
+.workspace-actions {
+    display: flex;
+    gap: 10px;
+    /* Butonlar arasına boşluk bırakır */
+    align-items: center;
+}
+
+.view-members-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background-color: #6c757d;
+    /* Koyu gri veya başka bir renk seçilebilir */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.view-members-btn:hover {
+    background-color: #5a6268;
+}
+
+/* Mevcut buton stilleriniz: */
+.add-member-btn {
+    /* ... (Mevcut stilleriniz) */
 }

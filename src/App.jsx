@@ -9,7 +9,7 @@ import {
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./hooks/useAuth";
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'; // React Query için gerekli
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
 
 // Sayfalar
@@ -26,13 +26,15 @@ import Register from './pages/Register';
 import SettingsDrawerWrapper from './pages/SettingsDrawerWrapper';
 import WorkSpace from './pages/Workspace.jsx';
 import BoardPage from './pages/BoardPage.jsx';
+import WorkspaceMember from './pages/WorkspaceMember.jsx'; // Yeni eklenen bileşen
 import Settings2 from './pages/Settings2';
+import BoardMember from './pages/BoardMember.jsx';
 
 // Bileşenler
 import ProtectedRoute from './components/ProtectedRoute';
 
 export const ThemeContext = createContext();
-const queryClient = new QueryClient(); // QueryClient oluşturuldu
+const queryClient = new QueryClient();
 
 const darkTheme = {
   background: "#18191A",
@@ -90,12 +92,27 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
-        {/* DÜZELTİLEN KISIM: BoardPage rotası sadece boardId bekleyecek */}
         <Route
-          path="/board/:boardId" // Sadece boardId parametresini bekliyoruz
+          path="/workspace/:workspaceId/members"
+          element={
+            <ProtectedRoute>
+              <WorkspaceMember />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/board/:boardId"
           element={
             <ProtectedRoute>
               <BoardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/workspace/:workspaceId/board/:boardId/members"
+          element={
+            <ProtectedRoute>
+              <BoardMember />
             </ProtectedRoute>
           }
         />
@@ -124,7 +141,6 @@ function AppContent() {
             </ProtectedRoute>
           }
         >
-          {/* Admin alt rotaları, Admin bileşenindeki Outlet'te görünecek */}
           <Route index element={<AdminDashboard />} />
           <Route path="workspaces" element={<AdminWorkspaces />} />
           <Route path="logs" element={<AdminLogs />} />
@@ -159,7 +175,7 @@ function App() {
       <Router>
         <AuthProvider>
           <ThemeContext.Provider value={{ theme, setTheme }}>
-            <QueryClientProvider client={queryClient}> {/* QueryClientProvider eklendi */}
+            <QueryClientProvider client={queryClient}>
               <AppContent />
             </QueryClientProvider>
           </ThemeContext.Provider>
