@@ -205,27 +205,32 @@ export const removeBoardMember = (boardId, memberId, requesterId) =>
     })
     .then(res => res.data);
 
+
 // ——— Lists ———
 // BİR PANODAKİ TÜM LİSTELERİ GETİRİR (endpoint görselinize göre düzenlendi)
 export const getListsByBoard = (boardId) =>
-  apiClient.get(`/api/lists/board/${boardId}`).then(res => res.data);
+    apiClient.get(`/api/lists/board/${boardId}`).then(res => res.data);
 
 // TEK BİR LİSTEYİ GÜNCELLE
 export const updateList = (id, data) =>
-  apiClient.put(`/api/lists/${id}`, data).then(res => res.data);
+    apiClient.put(`/api/lists/${id}`, data).then(res => res.data);
 
 // TEK BİR LİSTEYİ SİL
 export const deleteList = id =>
-  apiClient.delete(`/api/lists/${id}`).then(res => res.data);
+    apiClient.delete(`/api/lists/${id}`).then(res => res.data);
 
 // TÜM LİSTELERİ GETİR (Genelde kullanılmaz, ancak API'de mevcut)
 export const getLists = () => apiClient.get('/api/lists').then(res => res.data);
 
 // YENİ LİSTE OLUŞTUR
 export const createList = data =>
-  apiClient.post('/api/lists', data).then(res => res.data);
+    apiClient.post('/api/lists', data).then(res => res.data);
 
 // ——— Cards ———
+
+export const getCardsByListId = (listId) =>
+  apiClient.get(`/api/cards/list/${listId}`).then(res => res.data);
+
 export const getCard = id =>
   apiClient.get(`/api/cards/${id}`).then(res => res.data)
 
@@ -239,6 +244,7 @@ export const getCards = () => apiClient.get('/api/cards').then(res => res.data)
 
 export const createCard = data =>
   apiClient.post('/api/cards', data).then(res => res.data)
+
 
 // ——— Labels ———
 export const getLabels = () =>

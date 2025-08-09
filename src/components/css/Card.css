@@ -44,7 +44,9 @@
     padding: 4px 0;
     font-size: 13px;
 }
-
+.checklist-item span {
+    color: #172b4d; /* Koyu renk bir metin rengi */
+}
 .check-box {
     width: 16px;
     height: 16px;

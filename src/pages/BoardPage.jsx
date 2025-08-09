@@ -1,28 +1,32 @@
-// src/components/BoardPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { FiPlus } from 'react-icons/fi';
 import axios from 'axios';
+import { useCallback, useEffect, useState } from 'react';
+import { FiPlus } from 'react-icons/fi';
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-// AddBoardMemberPopup bileşenini import edin
-import AddBoardMemberPopup from './AddBoardMemberPopup.jsx';
-
-import List from './List.jsx';
+// CSS dosyasını içe aktarıyoruz
 import '../components/css/BoardPage.css';
+
+// Bileşenleri içe aktarıyoruz
+import AddBoardMemberPopup from './AddBoardMemberPopup.jsx';
+import List from './List.jsx';
+
+// API servislerini içe aktarıyoruz
 import {
-    getListsByBoard,
-    createList,
-    updateList,
-    deleteList,
     createCard,
-    updateCard,
-    deleteCard
+    createList,
+    deleteCard,
+    deleteList,
+    getCardsByListId,
+    getListsByBoard
 } from '../services/api';
 
 export default function BoardPage() {
-    // workspaceId'yi de useParams ile alıyoruz
-    const { workspaceId, boardId } = useParams();
+    // URL'den hem boardId hem de workspaceId'yi alıyoruz
+    const { boardId, workspaceId } = useParams();
     const navigate = useNavigate();
+
     const [lists, setLists] = useState([]);
     const [showListForm, setShowListForm] = useState(false);
     const [newListTitle, setNewListTitle] = useState('');
@@ -30,31 +34,54 @@ export default function BoardPage() {
     const [error, setError] = useState(null);
     const [showAddMemberPopup, setShowAddMemberPopup] = useState(false);
 
-    // ... (diğer fonksiyonlar aynı kalacak: fetchLists, handleAddList vb.)
+    // Koyu tema durumu (İsteğe bağlı, ekrandan gelmediği için false olarak bırakıldı)
+    const isDarkTheme = false;
+
+    /**
+     * API'den listeleri ve kartları çeken ana fonksiyon.
+     */
     const fetchLists = useCallback(async () => {
         if (!boardId) {
             setError("Geçersiz pano ID'si.");
             setLoading(false);
             return;
         }
+
+        console.log(`Pano (${boardId}) için listeler ve kartlar alınıyor...`);
         setLoading(true);
         setError(null);
         try {
-            const data = await getListsByBoard(boardId);
-            setLists(data);
+            // Adım 1: Listeleri API'den çek
+            const listsData = await getListsByBoard(boardId);
+            console.log("API'den gelen listeler:", listsData);
+
+            // Adım 2: Her bir liste için kartları çekme işlemini Promise ile yönet
+            const listsWithCardsPromises = listsData.map(async (list) => {
+                try {
+                    const cards = await getCardsByListId(list.listId);
+                    console.log(`List ID: ${list.listId} için gelen kartlar:`, cards);
+                    return {
+                        ...list,
+                        cards: cards || [] // Kart verisini listeye ekliyoruz
+                    };
+                } catch (cardError) {
+                    console.error(`List ID ${list.listId} için kartlar çekilirken hata oluştu:`, cardError);
+                    return {
+                        ...list,
+                        cards: [] // Hata durumunda boş bir kart dizisi dön
+                    };
+                }
+            });
+
+            // Adım 3: Tüm kart çekme işlemleri bitince Promise.all ile bekle
+            const listsWithCards = await Promise.all(listsWithCardsPromises);
+            setLists(listsWithCards);
+            console.log("Listeler ve kartlar başarıyla alındı.", listsWithCards);
+
         } catch (err) {
             console.error("Listeler alınırken hata oluştu:", err);
-            if (axios.isAxiosError(err)) {
-                if (err.response) {
-                    console.error("Sunucudan gelen hata yanıtı:", err.response.data);
-                    console.error("Hata durumu:", err.response.status);
-                    setError(`Sunucu hatası: ${err.response.status} - ${err.response.data?.message || 'Bilinmeyen Hata'}`);
-                } else if (err.request) {
-                    console.error("Sunucuya istek gönderilemedi:", err.request);
-                    setError("Sunucuya bağlanılamadı. Lütfen internet bağlantınızı ve sunucunuzun açık olduğunu kontrol edin.");
-                } else {
-                    setError("İstek ayarlanırken bir hata oluştu.");
-                }
+            if (axios.isAxiosError(err) && err.response) {
+                setError(`Sunucu hatası: ${err.response.status} - ${err.response.data?.message || 'Bilinmeyen Hata'}`);
             } else {
                 setError("Beklenmedik bir hata oluştu.");
             }
@@ -63,66 +90,103 @@ export default function BoardPage() {
         }
     }, [boardId]);
 
+    /**
+     * Bileşen yüklendiğinde ve boardId değiştiğinde listeleri çekiyoruz.
+     */
     useEffect(() => {
         fetchLists();
     }, [fetchLists]);
 
+    /**
+     * Yeni liste oluşturma fonksiyonu.
+     */
     const handleAddList = async () => {
-        if (!newListTitle.trim()) return;
+        if (!newListTitle.trim()) {
+            toast.warn('Liste başlığı boş olamaz!');
+            return;
+        }
         try {
             await createList({ boardId, title: newListTitle });
             setNewListTitle('');
             setShowListForm(false);
-            fetchLists();
+            await fetchLists();
+            toast.success('Liste başarıyla eklendi!');
         } catch (err) {
             console.error("Liste oluşturulurken hata oluştu:", err);
-            setError("Liste oluşturulurken bir hata oluştu.");
+            toast.error("Liste oluşturulurken bir hata oluştu.");
         }
     };
 
+    /**
+     * Liste silme fonksiyonu.
+     */
     const handleListDelete = async (listId) => {
         try {
             await deleteList(listId);
-            fetchLists();
+            await fetchLists();
+            toast.success('Liste başarıyla silindi!');
         } catch (err) {
             console.error("Liste silinirken hata oluştu:", err);
-            setError("Liste silinirken bir hata oluştu.");
+            toast.error("Liste silinirken bir hata oluştu.");
         }
     };
 
-    const handleCardAdd = async (listId, cardData) => {
+    /**
+     * Kart ekleme fonksiyonu.
+     */
+    const handleCardAdd = async (cardData) => {
         try {
-            await createCard({ ...cardData, listId });
-            fetchLists();
+            console.log("Kart ekleme işlemi başlatılıyor...");
+            const payload = {
+                title: cardData.title,
+                listId: cardData.listId,
+                memberId: 29
+            };
+            console.log("API'ye gönderilecek veri:", payload);
+
+            await createCard(payload);
+            console.log("Kart başarıyla oluşturuldu, listeler yenileniyor...");
+            await fetchLists(); // Kart eklendikten sonra listeleri yeniden çekerek güncel veriyi alıyoruz
+            toast.success('Kart başarıyla eklendi!');
+            console.log("Kart ekleme ve liste yenileme işlemi tamamlandı.");
         } catch (err) {
             console.error("Kart oluşturulurken hata oluştu:", err);
-            setError("Kart oluşturulurken bir hata oluştu.");
+            const errorMessage = axios.isAxiosError(err) && err.response?.data?.message ?
+                err.response.data.message :
+                'Kart oluşturulurken bir hata oluştu. Lütfen konsolu kontrol edin.';
+            toast.error(errorMessage);
         }
     };
 
-    const handleCardUpdate = async (updatedCard) => {
+    /**
+     * Kart güncelleme fonksiyonu.
+     */
+    const handleCardUpdate = async () => {
         try {
-            await updateCard(updatedCard.id, updatedCard);
-            fetchLists();
+            await fetchLists(); // Güncelleme sonrası listeleri yeniden çekiyoruz
+            // toast mesajı List veya Card bileşeninden geleceği için burada eklemiyoruz.
         } catch (err) {
             console.error("Kart güncellenirken hata oluştu:", err);
-            setError("Kart güncellenirken bir hata oluştu.");
+            // toast mesajı List veya Card bileşeninden geleceği için burada eklemiyoruz.
         }
     };
 
+    /**
+     * Kart silme fonksiyonu.
+     */
     const handleCardDelete = async (cardId) => {
         try {
             await deleteCard(cardId);
-            fetchLists();
+            await fetchLists(); // Silme sonrası listeleri yeniden çekiyoruz
+            toast.success('Kart başarıyla silindi!');
         } catch (err) {
             console.error("Kart silinirken hata oluştu:", err);
-            setError("Kart silinirken bir hata oluştu.");
+            toast.error("Kart silinirken bir hata oluştu.");
         }
     };
 
-    // Yeni yönlendirme fonksiyonu
+    // Yeni eklenen yönlendirme fonksiyonu
     const handleViewMembers = () => {
-        // Doğru rotaya yönlendirme yapılıyor
         navigate(`/workspace/${workspaceId}/board/${boardId}/members`);
     };
 
@@ -149,13 +213,24 @@ export default function BoardPage() {
 
     return (
         <div className="board-page">
+            <ToastContainer
+                position="top-right"
+                autoClose={2000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme={isDarkTheme ? 'dark' : 'light'}
+            />
             <div className="board-header">
                 <h1>Pano {boardId}</h1>
                 <div className="board-actions">
-                    {/* Yeni eklenen buton */}
                     <button
                         className="view-members-button"
-                        onClick={handleViewMembers} // Yeni fonksiyona tıklandığında çalışır
+                        onClick={handleViewMembers}
                     >
                         Pano Üyelerini Görüntüle
                     </button>
@@ -177,12 +252,13 @@ export default function BoardPage() {
             <div className="lists-container">
                 {lists.map((list) => (
                     <List
-                        key={list.id}
+                        key={list.listId} // list.id yerine list.listId kullanıldı
                         list={list}
                         onListDelete={handleListDelete}
                         onCardAdd={handleCardAdd}
                         onCardUpdate={handleCardUpdate}
                         onCardDelete={handleCardDelete}
+                        onUpdate={fetchLists} // Card bileşeninin checklist güncelleme işlemleri için eklendi
                     />
                 ))}
 
@@ -226,7 +302,7 @@ export default function BoardPage() {
                 <AddBoardMemberPopup
                     onClose={() => setShowAddMemberPopup(false)}
                     boardId={boardId}
-                    workspaceId={selectedWorkspace.id}
+                    workspaceId={workspaceId} // workspaceId props olarak gönderildi
                 />
             )}
         </div>

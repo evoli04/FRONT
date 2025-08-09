@@ -1,22 +1,21 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { FiPlus, FiUsers } from 'react-icons/fi'; // FiUsers ikonunu ekliyoruz
+import { useContext, useEffect, useState } from 'react';
+import { FiPlus, FiUsers } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import WorkspaceSidebar from './WorkspaceSidebar';
-import WorkspacePopup from './WorkspacePopup';
-import WorkspaceMemberAddPopup from './WorkspaceMemberAddPopup';
-import Settings from './Settings';
-import BoardPopup from './BoardPopup';
-import Board from './Board.jsx';
 import { ThemeContext } from '../App';
+import '../components/css/workspace.css';
 import { AuthContext } from '../context/AuthContext';
 import {
-    getWorkspacesByMember,
+    createBoard,
     createWorkspace,
     getBoardsByWorkspace,
-    createBoard,
-    inviteWorkspaceMember
+    getWorkspacesByMember,
+    inviteWorkspaceMember,
 } from '../services/api';
-import '../components/css/workspace.css';
+import Board from './Board.jsx';
+import Settings from './Settings';
+import WorkspaceMemberAddPopup from './WorkspaceMemberAddPopup';
+import WorkspacePopup from './WorkspacePopup';
+import WorkspaceSidebar from './WorkspaceSidebar';
 
 export default function Workspace() {
     const { theme } = useContext(ThemeContext);
@@ -110,7 +109,7 @@ export default function Workspace() {
 
             const response = await createWorkspace({
                 memberId: memberId,
-                workspaceName: name.trim()
+                workspaceName: name.trim(),
             });
 
             console.log("API'den gelen ham yanıt:", response);
@@ -119,7 +118,7 @@ export default function Workspace() {
                 const updatedUser = {
                     ...user,
                     roleId: response.roleId,
-                    roleName: response.roleName
+                    roleName: response.roleName,
                 };
                 updateUser(updatedUser);
                 console.log("AuthContext, yeni kullanıcı verileriyle başarıyla güncellendi:", updatedUser);
@@ -135,13 +134,13 @@ export default function Workspace() {
                     boards: [],
                     roleId: response.roleId,
                     roleName: response.roleName,
-                }
+                },
             ]);
             setShowWorkspacePopup(false);
         } catch (error) {
             console.error('Workspace oluşturma hatası:', {
                 error: error.response?.data || error.message,
-                sentData: { memberId: memberId, workspaceName: name }
+                sentData: { memberId: memberId, workspaceName: name },
             });
             setError(error.response?.data?.message || error.message);
         }
@@ -180,7 +179,7 @@ export default function Workspace() {
             ));
             setSelectedWorkspace(prev => ({
                 ...prev,
-                boards: [...(prev.boards || []), newBoard]
+                boards: [...(prev.boards || []), newBoard],
             }));
         } catch (error) {
             console.error('Board creation error:', error);
@@ -196,10 +195,8 @@ export default function Workspace() {
             const response = await inviteWorkspaceMember({
                 workspaceId: selectedWorkspace.id,
                 email,
-                role
+                role,
             });
-
-            // Refresh workspace data or show success message
             return response;
         } catch (error) {
             console.error('Member invitation error:', error);
@@ -211,7 +208,7 @@ export default function Workspace() {
         const updatedUser = {
             ...user,
             roleId: workspace.roleId,
-            roleName: workspace.roleName
+            roleName: workspace.roleName,
         };
         updateUser(updatedUser);
 
@@ -220,7 +217,7 @@ export default function Workspace() {
     };
 
     const handleDeleteWorkspace = (workspaceId) => {
-        // ... (Silme işlemini gerçekleştirecek kod)
+        // Silme işlemini gerçekleştirecek kod
     };
 
     const handleOpenSettings = () => setShowSettingsDrawer(true);
@@ -285,7 +282,6 @@ export default function Workspace() {
                         <div className="workspace-header">
                             <h2 className="workspace-name">{selectedWorkspace.name}</h2>
                             <div className="workspace-actions">
-                                {/* Yeni buton burada */}
                                 <button
                                     className="view-members-btn"
                                     onClick={handleViewMembers}

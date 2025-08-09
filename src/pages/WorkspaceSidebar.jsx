@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { FiSettings, FiLogOut, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { useContext, useState } from 'react';
+import { FiLogOut, FiPlus, FiSettings, FiTrash2 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import '../components/css/WorkspaceSidebar.css';
+import { AuthContext } from '../context/AuthContext';
 
 /**
  * Bu bileşen, çalışma alanları ve panolar için yan menüyü oluşturur.
@@ -29,11 +30,13 @@ export default function WorkspaceSidebar({
 }) {
     const navigate = useNavigate();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const { logout } = useContext(AuthContext);
 
     const handleLogout = () => setShowLogoutModal(true);
 
     const confirmLogout = () => {
         setShowLogoutModal(false);
+        logout();
         navigate('/login');
     };
 

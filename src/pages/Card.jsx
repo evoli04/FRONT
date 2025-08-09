@@ -1,35 +1,80 @@
-// Card.jsx
-import React, { useState } from 'react';
-import { FiPlus, FiTrash2, FiCheck } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiCheck, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 import '../components/css/Card.css';
+import { createChecklist, createChecklistItem, toggleChecklistItem } from '../services/api';
 
 export default function Card({ card, onUpdate, onDelete }) {
     const [newChecklistItem, setNewChecklistItem] = useState('');
     const [showChecklistForm, setShowChecklistForm] = useState(false);
 
-    const handleAddChecklist = () => {
-        if (!newChecklistItem.trim()) return;
-        const updatedCard = {
-            ...card,
-            checklists: [...card.checklists, {
-                id: Date.now(),
+    /**
+     * Yeni bir checklist öğesi ekler. Eğer kartta hiç checklist yoksa önce bir tane oluşturur.
+     */
+    const handleAddChecklist = async () => {
+        if (!newChecklistItem.trim()) {
+            toast.warn('Checklist öğesi boş olamaz!');
+            return;
+        }
+
+        try {
+            let checklistId;
+
+            // checklists dizisinin varlığını ve en az bir elemanı olduğunu kontrol edin
+            // Bu kısım, ikinci kodunuzdaki lokal state mantığı yerine API çağrısını kullanır.
+            if (card.checklists && card.checklists.length > 0) {
+                // Eğer zaten bir checklist varsa, ilk checklist'in ID'sini kullanın
+                checklistId = card.checklists[0].checklistId;
+            } else {
+                // Eğer checklist yoksa, yeni bir tane oluşturun
+                const newChecklist = await createChecklist({ cardId: card.cardId, title: 'Checklist' });
+                checklistId = newChecklist.checklistId;
+            }
+
+            await createChecklistItem(checklistId, {
                 text: newChecklistItem,
-                completed: false
-            }]
-        };
-        onUpdate(updatedCard);
-        setNewChecklistItem('');
-        setShowChecklistForm(false);
+                isCompleted: false // Backend'e uyumlu olması için 'completed' yerine 'isCompleted' kullanıldı.
+            });
+
+            // Checklist ekledikten sonra, ana bileşenin veriyi yeniden çekmesini sağlamak için onUpdate çağrılır.
+            onUpdate();
+            setNewChecklistItem('');
+            setShowChecklistForm(false);
+            toast.success('Checklist öğesi eklendi!');
+        } catch (error) {
+            console.error('Checklist öğesi eklenirken hata oluştu:', error);
+            toast.error('Checklist öğesi eklenirken bir hata oluştu.');
+        }
     };
 
-    const toggleChecklist = (itemId) => {
-        const updatedCard = {
-            ...card,
-            checklists: card.checklists.map(item =>
-                item.id === itemId ? { ...item, completed: !item.completed } : item
-            )
-        };
-        onUpdate(updatedCard);
+    /**
+     * Checklist öğesinin tamamlanma durumunu değiştirir.
+     * Bu fonksiyon ilk kodunuzdaki API çağrısını kullanır.
+     */
+    const toggleChecklist = async (itemId) => {
+        try {
+            await toggleChecklistItem(itemId);
+            onUpdate();
+            toast.success('Checklist öğesi güncellendi!');
+        } catch (error) {
+            console.error('Checklist durumu güncellenirken hata oluştu:', error);
+            toast.error('Checklist durumu güncellenirken bir hata oluştu.');
+        }
+    };
+
+    /**
+     * Kartı siler.
+     * onDelete prop'u, BoardPage'den gelen silme işlevini çağırır.
+     */
+    const handleDeleteCard = async () => {
+        try {
+            // onDelete prop'u BoardPage'deki `handleCardDelete` fonksiyonuna karşılık gelir
+            await onDelete(card.cardId);
+            toast.success('Kart başarıyla silindi!');
+        } catch (error) {
+            console.error('Kart silinirken hata oluştu:', error);
+            toast.error('Kart silinirken bir hata oluştu.');
+        }
     };
 
     return (
@@ -38,26 +83,38 @@ export default function Card({ card, onUpdate, onDelete }) {
                 <h4 className="card-title">{card.title}</h4>
                 <button
                     className="delete-card-button"
-                    onClick={onDelete}
+                    onClick={handleDeleteCard}
                     aria-label="Kartı sil"
                 >
                     <FiTrash2 size={14} />
                 </button>
             </div>
 
-            {card.checklists.length > 0 && (
+            {/* Checklist'leri ve içindeki öğeleri güvenli bir şekilde render etme */}
+            {card.checklists && card.checklists.length > 0 && (
                 <div className="checklists-container">
-                    {card.checklists.map((item) => (
-                        <div key={item.id} className="checklist-item">
-                            <button
-                                className={`check-box ${item.completed ? 'checked' : ''}`}
-                                onClick={() => toggleChecklist(item.id)}
-                            >
-                                {item.completed && <FiCheck size={10} />}
-                            </button>
-                            <span className={item.completed ? 'completed' : ''}>
-                                {item.text}
-                            </span>
+                    {card.checklists.map((checklist) => (
+                        <div key={checklist.checklistId}>
+                            <h5>{checklist.title}</h5>
+
+                            {/* Checklist öğelerini güvenli bir şekilde render etme */}
+                            {checklist.items && checklist.items.length > 0 && (
+                                <>
+                                    {checklist.items.map((item) => (
+                                        <div key={item.checklistItemsId} className="checklist-item">
+                                            <button
+                                                className={`check-box ${item.isCompleted ? 'checked' : ''}`}
+                                                onClick={() => toggleChecklist(item.checklistItemsId)}
+                                            >
+                                                {item.isCompleted && <FiCheck size={10} />}
+                                            </button>
+                                            <span className={item.isCompleted ? 'completed' : ''}>
+                                                {item.text}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -69,6 +126,11 @@ export default function Card({ card, onUpdate, onDelete }) {
                         type="text"
                         value={newChecklistItem}
                         onChange={(e) => setNewChecklistItem(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleAddChecklist();
+                            }
+                        }}
                         placeholder="Checklist öğesi ekle"
                         autoFocus
                     />
