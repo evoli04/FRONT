@@ -1,9 +1,8 @@
 // src/pages/AdminDashboard.jsx
-import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { getAdminWorkspacesCount, getAdminUsersActiveCount } from '../services/api';
 import '../components/css/Admin.css';
+import { getAdminUsersActiveCount, getAdminWorkspacesCount } from '../services/api';
 
 const AdminDashboard = () => {
     const { t } = useTranslation();
@@ -43,4 +42,4 @@ const AdminDashboard = () => {
     );
 };
 
-export default AdminDashboard;
+export default AdminDashboard; 

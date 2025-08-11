@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { useNavigate, Link, Outlet } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import '../components/css/Admin.css';
-import { ThemeContext } from '../App';
+import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { ThemeContext } from '../App';
+import '../components/css/Admin.css';
+import { useAuth } from '../hooks/useAuth';
 
-import Settings from './Settings';
-import { IconButton } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { IconButton } from '@mui/material';
+import Settings from './Settings';
 
 const Admin = () => {
     const { user, token, loading } = useAuth();
