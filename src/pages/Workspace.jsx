@@ -7,6 +7,7 @@ import { AuthContext } from '../context/AuthContext';
 import {
     createBoard,
     createWorkspace,
+    deleteWorkspace,
     getBoardsByWorkspace,
     getWorkspacesByMember,
     inviteWorkspaceMember,
@@ -216,9 +217,28 @@ export default function Workspace() {
         setShowAllWorkspaces(false);
     };
 
-    const handleDeleteWorkspace = (workspaceId) => {
-        // Silme işlemini gerçekleştirecek kod
-    };
+  const handleDeleteWorkspace = async (workspaceId) => {
+    // Kullanıcıya bir onay penceresi gösterin
+    const isConfirmed = window.confirm(
+        'Bu çalışma alanını kalıcı olarak silmek istediğinizden emin misiniz?'
+    );
+
+    if (!isConfirmed) {
+        return; // Onaylamazsa işlemi durdur
+    }
+
+    try {
+        await deleteWorkspace(workspaceId);
+        // Silme işlemi başarılı olursa, state'i güncelle
+        setWorkspaces(prev => prev.filter(ws => ws.id !== workspaceId));
+        setSelectedWorkspace(null); // Seçili çalışma alanını sıfırla
+        setShowAllWorkspaces(true); // Tüm çalışma alanlarını göster
+        alert('Çalışma alanı başarıyla silindi.');
+    } catch (error) {
+        console.error('Çalışma alanı silme hatası:', error);
+        alert('Çalışma alanı silinirken bir hata oluştu.');
+    }
+};
 
     const handleOpenSettings = () => setShowSettingsDrawer(true);
     const handleCloseSettings = () => setShowSettingsDrawer(false);
@@ -236,7 +256,7 @@ export default function Workspace() {
     return (
         <div className="workspace-container" data-theme={theme}>
             <WorkspaceSidebar
-                workspaces={workspaces}
+                workspaces={workspaces} 
                 selectedWorkspace={selectedWorkspace}
                 onSelectWorkspace={handleWorkspaceSelect}
                 onShowAllWorkspaces={() => {

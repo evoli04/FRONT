@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { FiPlus, FiTrash2 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../components/css/List.css';
-import Card from './Card';
+import '../components/css/List.css'; // CSS yolu muhtemelen değişmedi
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'; // Modal yolunu güncelledik
+import Card from './Card'; // Pages klasöründeki Card bileşenini import edin
 
 /**
  * Bu bileşen, bir panodaki listeyi ve içindeki kartları görüntüler.
@@ -19,6 +20,7 @@ import Card from './Card';
 export default function List({ list, onListDelete, onCardAdd, onCardUpdate, onCardDelete, isDarkTheme }) {
     const [newCardTitle, setNewCardTitle] = useState('');
     const [showCardForm, setShowCardForm] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // Modal durumunu yönetmek için yeni state
 
     // Temaya göre dinamik olarak CSS sınıflarını belirliyoruz
     const listClass = isDarkTheme ? 'list-container dark' : 'list-container';
@@ -30,15 +32,11 @@ export default function List({ list, onListDelete, onCardAdd, onCardUpdate, onCa
             toast.warn('Kart başlığı boş olamaz!');
             return;
         }
-
         try {
-            // Üst bileşenden gelen onCardAdd fonksiyonunu çağırıyoruz.
-            // API çağrısını BoardPage bileşeni yapacak ve panoyu güncelleyecektir.
             await onCardAdd({
                 title: newCardTitle,
-                listId: list.listId, // API'nizin beklediği "listId" parametresi kullanıldı.
+                listId: list.listId,
             });
-
             setNewCardTitle('');
             setShowCardForm(false);
             toast.success('Kart başarıyla eklendi!');
@@ -48,18 +46,39 @@ export default function List({ list, onListDelete, onCardAdd, onCardUpdate, onCa
         }
     };
 
-    // `list.cards` verisinin bir dizi olup olmadığını kontrol ediyoruz.
-    // Bu kontrol, API'den gelen verinin bazen boş veya undefined olma durumunda
-    // uygulamanın çökmesini engeller.
+    /**
+     * Modal üzerinden onaylandıktan sonra listeyi silme işlemini gerçekleştirir.
+     */
+    const confirmAndDeleteList = async () => {
+        try {
+            await onListDelete(list.listId);
+            toast.success('Liste başarıyla silindi!');
+        } catch (error) {
+            console.error("Liste silinirken hata oluştu:", error);
+            toast.error('Liste silinirken bir hata oluştu.');
+        } finally {
+            setShowDeleteModal(false); // İşlem bitince veya hata olsa bile modalı kapat
+        }
+    };
+
     const cards = Array.isArray(list.cards) ? list.cards : [];
 
     return (
         <div className={listClass}>
+             {showDeleteModal && (
+                <DeleteConfirmationModal
+                    message={`"${list.title}" adlı listeyi silmek istediğinizden emin misiniz?`}
+                    onConfirm={confirmAndDeleteList}
+                    onCancel={() => setShowDeleteModal(false)}
+                    isDarkTheme={isDarkTheme} // isDarkTheme prop'unu ekledik
+                />
+            )}
+
             <div className="list-header">
                 <h3 className="list-title">{list.title}</h3>
                 <button
                     className="delete-list-button"
-                    onClick={() => onListDelete(list.listId)}
+                    onClick={() => setShowDeleteModal(true)} // Tıklanınca modalı aç
                     aria-label="Listeyi sil"
                 >
                     <FiTrash2 size={16} />

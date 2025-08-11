@@ -75,6 +75,16 @@ export const createWorkspace = async data => {
     throw error
   }
 }
+export const deleteWorkspace = async (workspaceId) => {
+  try {
+    
+    const response = await apiClient.delete(`/api/workspaces/${workspaceId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Workspace silinirken hata oluştu:', error);
+    throw error;
+  }
+};
 
 export const getWorkspacesByMember = memberId =>
   apiClient.get(`/api/workspaces/member/${memberId}`).then(res => res.data)
