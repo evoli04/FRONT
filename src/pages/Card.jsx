@@ -1,63 +1,124 @@
-// Card.jsx
-import React, { useState } from 'react';
-import { FiPlus, FiTrash2, FiCheck } from 'react-icons/fi';
-import '../components/css/Card.css';
+import { useState } from 'react';
+import { FiCheck, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { toast } from 'react-toastify';
+import '../components/css/Card.css'; // CSS yolu muhtemelen değişmedi
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'; // Modal yolunu güncelledik
+import { createChecklist, createChecklistItem, toggleChecklistItem } from '../services/api';
 
-export default function Card({ card, onUpdate, onDelete }) {
+export default function Card({ card, onUpdate, onDelete, isDarkTheme }) {
     const [newChecklistItem, setNewChecklistItem] = useState('');
     const [showChecklistForm, setShowChecklistForm] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // Modal durumunu yönetmek için yeni state
 
-    const handleAddChecklist = () => {
-        if (!newChecklistItem.trim()) return;
-        const updatedCard = {
-            ...card,
-            checklists: [...card.checklists, {
-                id: Date.now(),
+    /**
+     * Yeni bir checklist öğesi ekler.
+     */
+    const handleAddChecklist = async () => {
+        if (!newChecklistItem.trim()) {
+            toast.warn('Checklist öğesi boş olamaz!');
+            return;
+        }
+
+        try {
+            let checklistId;
+
+            if (card.checklists && card.checklists.length > 0) {
+                checklistId = card.checklists[0].checklistId;
+            } else {
+                const newChecklist = await createChecklist({ cardId: card.cardId, title: 'Checklist' });
+                checklistId = newChecklist.checklistId;
+            }
+
+            await createChecklistItem(checklistId, {
                 text: newChecklistItem,
-                completed: false
-            }]
-        };
-        onUpdate(updatedCard);
-        setNewChecklistItem('');
-        setShowChecklistForm(false);
+                isCompleted: false
+            });
+
+            onUpdate();
+            setNewChecklistItem('');
+            setShowChecklistForm(false);
+            toast.success('Checklist öğesi eklendi!');
+        } catch (error) {
+            console.error('Checklist öğesi eklenirken hata oluştu:', error);
+            toast.error('Checklist öğesi eklenirken bir hata oluştu.');
+        }
     };
 
-    const toggleChecklist = (itemId) => {
-        const updatedCard = {
-            ...card,
-            checklists: card.checklists.map(item =>
-                item.id === itemId ? { ...item, completed: !item.completed } : item
-            )
-        };
-        onUpdate(updatedCard);
+    /**
+     * Checklist öğesinin tamamlanma durumunu değiştirir.
+     */
+    const toggleChecklist = async (itemId) => {
+        try {
+            await toggleChecklistItem(itemId);
+            onUpdate();
+            toast.success('Checklist öğesi güncellendi!');
+        } catch (error) {
+            console.error('Checklist durumu güncellenirken hata oluştu:', error);
+            toast.error('Checklist durumu güncellenirken bir hata oluştu.');
+        }
+    };
+
+    /**
+     * Modal üzerinden onaylandıktan sonra kartı silme işlemini gerçekleştirir.
+     */
+    const confirmAndDeleteCard = async () => {
+        try {
+            await onDelete(card.cardId);
+            toast.success('Kart başarıyla silindi!');
+        } catch (error) {
+            console.error('Kart silinirken hata oluştu:', error);
+            toast.error('Kart silinirken bir hata oluştu.');
+        } finally {
+            setShowDeleteModal(false); // İşlem bitince veya hata olsa bile modalı kapat
+        }
     };
 
     return (
         <div className="card-container">
+            {showDeleteModal && (
+                <DeleteConfirmationModal
+                    message={`"${card.title}" adlı kartı silmek istediğinizden emin misiniz?`}
+                    onConfirm={confirmAndDeleteCard}
+                    onCancel={() => setShowDeleteModal(false)}
+                    isDarkTheme={isDarkTheme}
+                />
+            )}
+
             <div className="card-header">
                 <h4 className="card-title">{card.title}</h4>
                 <button
                     className="delete-card-button"
-                    onClick={onDelete}
+                    onClick={() => setShowDeleteModal(true)} // Tıklanınca modalı aç
                     aria-label="Kartı sil"
                 >
                     <FiTrash2 size={14} />
                 </button>
             </div>
-
-            {card.checklists.length > 0 && (
+            
+            {/* ... (Geri kalan kısım aynı kalabilir) ... */}
+            
+            {card.checklists && card.checklists.length > 0 && (
                 <div className="checklists-container">
-                    {card.checklists.map((item) => (
-                        <div key={item.id} className="checklist-item">
-                            <button
-                                className={`check-box ${item.completed ? 'checked' : ''}`}
-                                onClick={() => toggleChecklist(item.id)}
-                            >
-                                {item.completed && <FiCheck size={10} />}
-                            </button>
-                            <span className={item.completed ? 'completed' : ''}>
-                                {item.text}
-                            </span>
+                    {card.checklists.map((checklist) => (
+                        <div key={checklist.checklistId}>
+                            <h5>{checklist.title}</h5>
+                            {checklist.items && checklist.items.length > 0 && (
+                                <>
+                                    {checklist.items.map((item) => (
+                                        <div key={item.checklistItemsId} className="checklist-item">
+                                            <button
+                                                className={`check-box ${item.isCompleted ? 'checked' : ''}`}
+                                                onClick={() => toggleChecklist(item.checklistItemsId)}
+                                            >
+                                                {item.isCompleted && <FiCheck size={10} />}
+                                            </button>
+                                            <span className={item.isCompleted ? 'completed' : ''}>
+                                                {item.text}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -69,6 +130,11 @@ export default function Card({ card, onUpdate, onDelete }) {
                         type="text"
                         value={newChecklistItem}
                         onChange={(e) => setNewChecklistItem(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleAddChecklist();
+                            }
+                        }}
                         placeholder="Checklist öğesi ekle"
                         autoFocus
                     />

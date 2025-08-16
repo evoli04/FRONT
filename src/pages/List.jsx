@@ -3,24 +3,14 @@ import { FiPlus, FiTrash2 } from 'react-icons/fi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../components/css/List.css';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Card from './Card';
 
-/**
- * Bu bileşen, bir panodaki listeyi ve içindeki kartları görüntüler.
- * Veri yönetimi ve API çağrıları, üst bileşen olan BoardPage tarafından yapılır.
- *
- * @param {Object} list - Liste verileri.
- * @param {Function} onListDelete - Listeyi silme işlevi.
- * @param {Function} onCardAdd - Yeni kart ekleme işlevi.
- * @param {Function} onCardUpdate - Kart güncelleme işlevi.
- * @param {Function} onCardDelete - Kart silme işlevi.
- * @param {boolean} isDarkTheme - Koyu tema aktifse 'true', değilse 'false'.
- */
 export default function List({ list, onListDelete, onCardAdd, onCardUpdate, onCardDelete, isDarkTheme }) {
     const [newCardTitle, setNewCardTitle] = useState('');
     const [showCardForm, setShowCardForm] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    // Temaya göre dinamik olarak CSS sınıflarını belirliyoruz
     const listClass = isDarkTheme ? 'list-container dark' : 'list-container';
     const cardFormClass = isDarkTheme ? 'add-card-form dark' : 'add-card-form';
     const addButtonClass = isDarkTheme ? 'add-card-button dark' : 'add-card-button';
@@ -30,31 +20,33 @@ export default function List({ list, onListDelete, onCardAdd, onCardUpdate, onCa
             toast.warn('Kart başlığı boş olamaz!');
             return;
         }
-
         try {
-            // Üst bileşenden gelen onCardAdd fonksiyonunu çağırıyoruz.
-            // Bu fonksiyon, API çağrısını yapacak ve panoyu güncelleyecektir.
-            await onCardAdd(list.id, {
+            await onCardAdd({
                 title: newCardTitle,
-                listId: list.id,
+                listId: list.listId,
             });
-    
             setNewCardTitle('');
             setShowCardForm(false);
             toast.success('Kart başarıyla eklendi!');
         } catch (error) {
             console.error("Kart eklenirken hata oluştu:", error);
-            // Hata mesajını kullanıcıya göstermek için toast kullanıyoruz
             toast.error('Kart eklenirken bir hata oluştu.');
         }
     };
 
-    // >>> BURADAKİ GÜNCELLEME BAŞLIYOR <<<
-    // 'list.cards' verisinin bir dizi olup olmadığını kontrol ediyoruz.
-    // Eğer null, undefined veya başka bir türde ise, varsayılan olarak boş bir dizi kullanıyoruz.
-    // Bu, '.map()' fonksiyonunun hata vermesini engeller.
+    const confirmAndDeleteList = async () => {
+        try {
+            await onListDelete(list.listId);
+            toast.success('Liste başarıyla silindi!');
+        } catch (error) {
+            console.error("Liste silinirken hata oluştu:", error);
+            toast.error('Liste silinirken bir hata oluştu.');
+        } finally {
+            setShowDeleteModal(false);
+        }
+    };
+
     const cards = Array.isArray(list.cards) ? list.cards : [];
-    // >>> GÜNCELLEME SONA ERİYOR <<<
 
     return (
         <div className={listClass}>
@@ -70,11 +62,21 @@ export default function List({ list, onListDelete, onCardAdd, onCardUpdate, onCa
                 pauseOnHover
                 theme={isDarkTheme ? 'dark' : 'light'}
             />
+            
+            {showDeleteModal && (
+                <DeleteConfirmationModal
+                    message={`"${list.title}" adlı listeyi silmek istediğinizden emin misiniz?`}
+                    onConfirm={confirmAndDeleteList}
+                    onCancel={() => setShowDeleteModal(false)}
+                    isDarkTheme={isDarkTheme}
+                />
+            )}
+
             <div className="list-header">
                 <h3 className="list-title">{list.title}</h3>
                 <button
                     className="delete-list-button"
-                    onClick={() => onListDelete(list.id)}
+                    onClick={() => setShowDeleteModal(true)}
                     aria-label="Listeyi sil"
                 >
                     <FiTrash2 size={16} />
@@ -82,18 +84,19 @@ export default function List({ list, onListDelete, onCardAdd, onCardUpdate, onCa
             </div>
 
             <div className="cards-container">
-                {/* Artık 'cards' değişkeninin kesinlikle bir dizi olduğunu biliyoruz. */}
-                {cards.map((card) => (
-                    <Card
-                        key={card.id}
-                        card={card}
-                        onUpdate={(updatedCard) => onCardUpdate(list.id, updatedCard)}
-                        onDelete={() => onCardDelete(list.id, card.id)}
-                        isDarkTheme={isDarkTheme}
-                    />
-                ))}
-                {/* Eğer kart yoksa bir placeholder göstermek isterseniz buraya ekleyebilirsiniz */}
-                {cards.length === 0 && <p className="empty-list-message">Bu listede hiç kart yok.</p>}
+                {cards.length > 0 ? (
+                    cards.map((card) => (
+                        <Card
+                            key={card.cardId}
+                            card={card}
+                            onUpdate={(updatedCard) => onCardUpdate(list.listId, updatedCard)}
+                            onDelete={() => onCardDelete(list.listId, card.cardId)}
+                            isDarkTheme={isDarkTheme}
+                        />
+                    ))
+                ) : (
+                    <p className="empty-list-message">Bu listede hiç kart yok.</p>
+                )}
             </div>
 
             {showCardForm ? (

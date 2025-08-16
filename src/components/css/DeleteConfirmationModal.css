@@ -1,0 +1,126 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-overlay.dark {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: slideUp 0.3s ease-out;
+}
+
+.modal-content.dark {
+    background-color: #2d3748;
+    color: #f7fafc;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.modal-icon {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.modal-icon svg {
+    width: 48px;
+    height: 48px;
+}
+
+.modal-message {
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: #4a5568;
+}
+
+.modal-content.dark .modal-message {
+    color: #e2e8f0;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.modal-cancel-btn, .modal-confirm-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+}
+
+.modal-cancel-btn {
+    background-color: #edf2f7;
+    color: #4a5568;
+}
+
+.modal-cancel-btn:hover {
+    background-color: #e2e8f0;
+}
+
+.modal-content.dark .modal-cancel-btn {
+    background-color: #4a5568;
+    color: #e2e8f0;
+}
+
+.modal-content.dark .modal-cancel-btn:hover {
+    background-color: #718096;
+}
+
+.modal-confirm-btn {
+    background-color: #fed7d7;
+    color: #e53e3e;
+}
+
+.modal-confirm-btn:hover {
+    background-color: #feb2b2;
+}
+
+.modal-content.dark .modal-confirm-btn {
+    background-color: #e53e3e;
+    color: white;
+}
+
+.modal-content.dark .modal-confirm-btn:hover {
+    background-color: #c53030;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
